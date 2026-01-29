@@ -1,6 +1,7 @@
 import { User, Shield, Download, Trash2, LogOut, ChevronRight, Wallet, Plus } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/ui/Modal';
 import { useState } from 'react';
 import { exportDataToExcel } from '../pages/SettingsPage';
@@ -11,6 +12,7 @@ import { Select } from '../components/ui/Select';
 
 export const ProfilePage = () => {
     const { data, user, updateUser, clearAllData } = useData();
+    const { signOut } = useAuth();
     const [isAccountsOpen, setIsAccountsOpen] = useState(false);
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
     const [isSecurityOpen, setIsSecurityOpen] = useState(false);
@@ -91,10 +93,13 @@ export const ProfilePage = () => {
                 </Card>
 
                 <div className="pt-6">
-                    <button className="w-full py-4 text-center text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2">
+                    <button
+                        onClick={() => signOut()}
+                        className="w-full py-4 text-center text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2"
+                    >
                         <LogOut size={20} /> Cerrar Sesión
                     </button>
-                    <p className="text-center text-xs text-muted-foreground/30 mt-4">v1.0.0 Finance App</p>
+                    <p className="text-center text-xs text-muted-foreground/30 mt-4">v1.1.0 Finance App</p>
                 </div>
             </div>
 
