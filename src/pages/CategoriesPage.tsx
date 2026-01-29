@@ -49,15 +49,10 @@ export const CategoriesPage = () => {
                     <Card key={cat.id} className="p-4 flex flex-col items-center justify-center gap-2 hover:bg-white/5 text-center group relative">
                         {/* Delete Button (Hover) */}
                         <button
-                            onClick={(e) => {
+                            onClick={async (e) => {
                                 e.stopPropagation();
                                 if (confirm(`¿Eliminar categoría "${cat.name}"?`)) {
-                                    // For now, simple delete. In real app, check for relations.
-                                    // But context doesn't export deleteCategory yet, need to add it or use raw supabase here?
-                                    // Better to add it to Context.
-                                    // For now let's just use a direct delete via Context if available or simple alert.
-                                    // WAIT, DataContext doesn't have deleteCategory. I should add it.
-                                    alert("Función de eliminar categoría pendiente de implementar en Contexto.");
+                                    await deleteCategory(cat.id);
                                 }
                             }}
                             className="absolute top-2 right-2 p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full opacity-0 group-hover:opacity-100 transition-all"
