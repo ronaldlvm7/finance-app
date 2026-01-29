@@ -4,13 +4,13 @@ import { UpcomingDebtsWidget } from '../components/dashboard/UpcomingDebtsWidget
 import { useData } from '../context/DataContext';
 import { Card } from '../components/ui/Card';
 import { formatCurrency } from '../utils/utils';
-import { CreditCard as CardIcon, Plus } from 'lucide-react';
+import { CreditCard as CardIcon, Plus, Trash2 } from 'lucide-react';
 import { Modal } from '../components/ui/Modal';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 
 export const CardsPage = () => {
-    const { data, addAccount } = useData();
+    const { data, addAccount, deleteAccount } = useData();
     const creditCards = data.accounts.filter(a => a.type === 'credit_card');
 
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -69,6 +69,17 @@ export const CardsPage = () => {
                                 <p className="font-bold text-red-400">{formatCurrency(debtAmount)}</p>
                                 <p className="text-[10px] text-muted-foreground">Deuda actual</p>
                             </div>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent card click
+                                    if (confirm(`¿Eliminar tarjeta ${card.name}? Esto borrará también el historial de deudas asociado.`)) {
+                                        deleteAccount(card.id);
+                                    }
+                                }}
+                                className="ml-4 p-2 text-muted-foreground hover:text-red-500 hover:bg-white/10 rounded-full transition-colors"
+                            >
+                                <Trash2 size={18} />
+                            </button>
                         </Card>
                     );
                 })}
