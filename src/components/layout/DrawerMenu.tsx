@@ -83,7 +83,6 @@ export const DrawerMenu = ({ isOpen, onClose }: DrawerMenuProps) => {
 
                     <div className="my-4 h-px bg-white/5 mx-2" />
 
-                    <DrawerItem to="/categories" icon={<Tag size={20} />} label="Categorías" onClick={onClose} />
                     <DrawerItem to="/settings" icon={<Settings size={20} />} label="Configuración" onClick={onClose} />
                     <DrawerItem to="/profile" icon={<Shield size={20} />} label="Seguridad y Datos" onClick={onClose} />
 

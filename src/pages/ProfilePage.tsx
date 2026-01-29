@@ -1,4 +1,4 @@
-import { User, Shield, Download, Trash2, LogOut, ChevronRight, Wallet, Plus } from 'lucide-react';
+import { User, Shield, Download, Trash2, LogOut, ChevronRight, Wallet, Plus, Settings } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -78,16 +78,9 @@ export const ProfilePage = () => {
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider ml-1 mt-6">Datos</h3>
                 <Card className="divide-y divide-white/5 overflow-hidden">
                     <MenuItem
-                        icon={<Download size={20} />}
-                        label="Exportar a Excel"
-                        onClick={() => exportDataToExcel(data)}
-                    />
-                    <MenuItem
-                        icon={<Trash2 size={20} className="text-red-500" />}
-                        label="Borrar Todo"
-                        textColor="text-red-500"
-                        showArrow={false}
-                        onClick={handleReset}
+                        icon={<Settings size={20} />}
+                        label="Ir a Configuración"
+                        onClick={() => window.location.href = '/settings'}
                     />
                 </Card>
 
