@@ -80,7 +80,7 @@ export const SettingsPage = () => {
                         <div key={acc.id} className="flex justify-between items-center p-3 rounded-lg border bg-background/50">
                             <div>
                                 <p className="font-medium">{acc.name}</p>
-                                <p className="text-xs text-muted-foreground capitalize">{acc.type.replace('_', ' ')}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{(acc.type || '').replace('_', ' ')}</p>
                             </div>
                             <div className="text-right">
                                 <p className="font-bold">S/ {acc.balance.toFixed(2)}</p>
