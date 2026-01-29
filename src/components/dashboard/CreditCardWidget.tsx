@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import { CreditCard as CardIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency } from '../../utils/utils';
 import { useState } from 'react';
-import { Button } from '../ui/Button';
 
 export const CreditCardWidget = () => {
     const { data } = useData();
@@ -22,28 +21,15 @@ export const CreditCardWidget = () => {
     // Let's assume user wants to see 'Total Debt' for this card.
     // We sum up debts where account_id matches currentCard.id
     const cardDebts = data.debts.filter(d => d.accountId === currentCard.id && d.type === 'credit_card');
-    const usedBalance = cardDebts.reduce((sum, d) => sum + d.currentBalance, 0); // Logic might differ if CC logic is "Debt based"
-
-    // Actually, for "Credit Card Widget", usually we show: 
-    // - Limit (from account)
-    // - Debt (sum of debts linked? OR if we use the 'negative balance' approach?)
-    // In our system: CC Purchase -> Increases Debt, Account Balance (Available) decreases.
-    // So 'Available' = currentCard.balance (if we update it correctly on transactions)
-    // OR 'Available' = Limit - Used. 
-    // Let's trust the Account Balance as 'Available' if our logic is solid.
-    // If not, let's calc Used = Limit - Balance.
 
     // Check if balance is tracked as 'Available Limit' or 'Current Balance' (often negative).
     // In our seed/logic: 'balance' for CC usually means "Available Credit".
     // Let's assume 'balance' is Available Amount.
     const available = currentCard.balance;
     const limit = currentCard.creditLimit || 0;
-    const debt = limit - available; // Rough estimate if balance is available. 
-    // Better: Sum of linked debts. 
-    const verifiedDebt = cardDebts.reduce((sum, d) => sum + d.currentBalance, 0);
 
-    // Use verifiedDebt for display if > 0, else fall back to calc? 
-    // Let's use verifiedDebt as "Deuda Facturada/Pendiente" and assume available is correct.
+    // Sum of linked debts. 
+    const verifiedDebt = cardDebts.reduce((sum, d) => sum + d.currentBalance, 0);
 
     const utilization = limit > 0 ? (verifiedDebt / limit) * 100 : 0;
 
