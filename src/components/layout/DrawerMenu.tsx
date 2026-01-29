@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
-import { X, ChevronRight, LogOut, Wallet, CreditCard, Goal, Shield, Info, Settings, Tag } from 'lucide-react';
+import { X, ChevronRight, LogOut, Wallet, CreditCard, Goal, Shield, Info, Settings } from 'lucide-react';
 import { cn } from '../../utils/utils';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';

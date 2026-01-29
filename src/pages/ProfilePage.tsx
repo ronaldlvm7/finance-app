@@ -1,16 +1,16 @@
-import { User, Shield, Download, Trash2, LogOut, ChevronRight, Wallet, Plus, Settings } from 'lucide-react';
+import { User, Shield, Trash2, LogOut, ChevronRight, Wallet, Plus, Settings } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { Modal } from '../components/ui/Modal';
 import { useState } from 'react';
-import { formatCurrency, exportDataToExcel } from '../utils/utils';
+import { formatCurrency } from '../utils/utils';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 
 export const ProfilePage = () => {
-    const { data, user, updateUser, clearAllData } = useData();
+    const { data, user, updateUser } = useData();
     const { signOut } = useAuth();
     const [isAccountsOpen, setIsAccountsOpen] = useState(false);
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -21,13 +21,6 @@ export const ProfilePage = () => {
     const totalAssets = data.accounts.filter(a => a.type !== 'credit_card').reduce((sum, a) => sum + a.balance, 0);
     const totalLiabilities = data.debts.reduce((sum, d) => sum + d.currentBalance, 0);
     const netWorth = totalAssets - totalLiabilities;
-
-    const handleReset = () => {
-        if (confirm('¿Estás seguro de que quieres borrar TODOS los datos? Esta acción es irreversible.')) {
-            clearAllData();
-            window.location.href = '/';
-        }
-    };
 
     const handleSaveProfile = () => {
         if (newName.trim()) {
