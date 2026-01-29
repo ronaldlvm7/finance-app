@@ -5,7 +5,7 @@ import { Modal } from '../components/ui/Modal';
 import { Trash2 } from 'lucide-react';
 
 export const CategoriesPage = () => {
-    const { data, addCategory } = useData(); // Added deleteCategory later if needed
+    const { data, addCategory, deleteCategory } = useData(); // Added deleteCategory later if needed
     const categories = data.categories;
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [newCatName, setNewCatName] = useState('');

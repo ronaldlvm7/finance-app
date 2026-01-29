@@ -26,6 +26,8 @@ interface DataContextType {
     addDebt: (debt: Omit<Debt, 'id'>) => Promise<void>;
     updateDebt: (debt: Debt) => Promise<void>;
     addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
+    updateCategory: (category: Category) => Promise<void>;
+    deleteCategory: (id: string) => Promise<void>;
     setBudget: (budget: Budget) => Promise<void>;
     addGoal: (goal: Omit<Goal, 'id'>) => Promise<void>;
     clearAllData: () => Promise<void>;
@@ -370,6 +372,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetchData();
     };
 
+    const updateCategory = async (cat: Category) => {
+        await supabase.from('categories').update({
+            name: cat.name,
+            icon: cat.icon,
+            color: cat.color
+        }).eq('id', cat.id);
+        fetchData();
+    };
+
+    const deleteCategory = async (id: string) => {
+        // Optional: Check if used in transactions before deleting?
+        // For V1, let's just delete. If DB has FK constraints it might fail or user should know.
+        // Usually we set is_archived, but let's hard delete for custom categories.
+        const { error } = await supabase.from('categories').delete().eq('id', id);
+        if (error) {
+            console.error("Error deleting category:", error);
+            alert("No se puede eliminar porque está en uso. Intenta editarla.");
+        }
+        fetchData();
+    };
+
     const setBudget = async (_budget: Budget) => {
         // Placeholder
     };
@@ -464,6 +487,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             addDebt,
             updateDebt,
             addCategory,
+            updateCategory,
+            deleteCategory,
             setBudget,
             addGoal,
             clearAllData
