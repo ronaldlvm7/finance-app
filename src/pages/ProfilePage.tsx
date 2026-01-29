@@ -133,7 +133,7 @@ export const ProfilePage = () => {
 
 // We can just embed the Accounts List logic here for better mobile UX
 const AccountsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-    const { data, addAccount } = useData();
+    const { data, addAccount, deleteAccount } = useData();
     const [isAddMode, setIsAddMode] = useState(false);
     const [accName, setAccName] = useState('');
     const [accType, setAccType] = useState('cash');
@@ -174,7 +174,17 @@ const AccountsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                                     <p className="text-xs text-muted-foreground capitalize">{acc.type.replace('_', ' ')}</p>
                                 </div>
                             </div>
-                            <span className="font-bold text-emerald-500">{formatCurrency(acc.balance)}</span>
+                            <span className="font-bold text-emerald-500 mr-2">{formatCurrency(acc.balance)}</span>
+                            <button
+                                onClick={() => {
+                                    if (confirm(`¿Eliminar cuenta ${acc.name}? Se borrarán sus movimientos asociados.`)) {
+                                        deleteAccount(acc.id);
+                                    }
+                                }}
+                                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-full transition-colors"
+                            >
+                                <Trash2 size={18} />
+                            </button>
                         </Card>
                     ))}
 

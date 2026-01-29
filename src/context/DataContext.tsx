@@ -22,6 +22,7 @@ interface DataContextType {
     deleteTransaction: (id: string) => Promise<void>;
     addAccount: (account: Omit<Account, 'id'>) => Promise<void>;
     updateAccount: (account: Account) => Promise<void>;
+    deleteAccount: (id: string) => Promise<void>;
     addDebt: (debt: Omit<Debt, 'id'>) => Promise<void>;
     updateDebt: (debt: Debt) => Promise<void>;
     addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
@@ -429,6 +430,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const deleteAccount = async (id: string) => {
+        if (!authUser) return;
+
+        try {
+            // Delete related data first (Cascade)
+            await supabase.from('transactions').delete().eq('from_account_id', id);
+            await supabase.from('transactions').delete().eq('to_account_id', id);
+            await supabase.from('debts').delete().eq('account_id', id);
+
+            // Delete Account
+            const { error } = await supabase.from('accounts').delete().eq('id', id);
+            if (error) throw error;
+
+            fetchData();
+        } catch (error) {
+            console.error("Error deleting account:", error);
+            alert("Error al eliminar la cuenta. Intente nuevamente.");
+        }
+    };
+
     return (
         <DataContext.Provider value={{
             data,
@@ -439,6 +460,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             deleteTransaction,
             addAccount,
             updateAccount,
+            deleteAccount,
             addDebt,
             updateDebt,
             addCategory,
