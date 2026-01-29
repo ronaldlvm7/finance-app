@@ -389,18 +389,43 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const clearAllData = async () => {
         if (!authUser) return;
 
-        try {
-            // Delete in order to avoid FK constraints
-            await supabase.from('transactions').delete().eq('user_id', authUser.id);
-            await supabase.from('debts').delete().eq('user_id', authUser.id);
-            await supabase.from('goals').delete().eq('user_id', authUser.id);
-            await supabase.from('accounts').delete().eq('user_id', authUser.id);
-            await supabase.from('categories').delete().eq('user_id', authUser.id);
+        // 1. Optimistic Update: Clear UI immediately
+        setData({
+            accounts: [],
+            transactions: [],
+            categories: [],
+            debts: [],
+            budgets: [],
+            goals: []
+        });
 
-            // Refetch (will be empty)
+        try {
+            // 2. Delete from Supabase
+            // Delete in order to avoid FK constraints
+            const { error: txError } = await supabase.from('transactions').delete().eq('user_id', authUser.id);
+            if (txError) throw txError;
+
+            const { error: dbError } = await supabase.from('debts').delete().eq('user_id', authUser.id);
+            if (dbError) throw dbError;
+
+            const { error: glError } = await supabase.from('goals').delete().eq('user_id', authUser.id);
+            if (glError) throw glError;
+
+            const { error: catError } = await supabase.from('categories').delete().eq('user_id', authUser.id);
+            if (catError) throw catError;
+
+            // Accounts last
+            const { error: acError } = await supabase.from('accounts').delete().eq('user_id', authUser.id);
+            if (acError) throw acError;
+
+            console.log("All data cleared successfully");
+
+            // 3. Final Fetch to ensure sync
             fetchData();
         } catch (error) {
             console.error("Error clearing data:", error);
+            alert("Hubo un error borrando los datos. Revisa la consola.");
+            fetchData(); // Revert state if error
         }
     };
 
