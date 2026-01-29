@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    /* Deep dark background */
+    --foreground: 0 0% 98%;
+    /* --card: 240 10% 6%; */
+    --card: 0 0% 9%;
+    /* Slightly lighter than background */
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary Orange: #FF9F43 */
+    --primary: 28 100% 63%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    /* Teal/Cyan Accent for FAB: #00D9C0 */
+    --accent: 172 100% 42%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 28 100% 63%;
+    /* Match primary for rings */
+
+    /* Chart / Progress Colors */
+    --chart-1: 217 91% 60%;
+    /* Blue #3B82F6 */
+    --chart-2: 340 82% 52%;
+    /* Pink #E91E63 */
+    --chart-3: 40 100% 50%;
+    /* Yellow #FFC107 */
+    --chart-4: 142 71% 45%;
+    /* Green #22C55E */
+    --chart-5: 28 100% 63%;
+    /* Orange */
+
+    --radius: 1rem;
+    /* More rounded corners */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+.glass-panel {
+  @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-xl;
+}
+
+.premium-card {
+  @apply bg-card border border-white/5 shadow-lg shadow-black/40;
+}
