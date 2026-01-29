@@ -3,6 +3,7 @@ import { useData } from '../context/DataContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { formatCurrency } from '../utils/utils';
 import { format } from 'date-fns';
+import { WeeklyBalanceChart } from '../components/dashboard/WeeklyBalanceChart';
 
 export const TransactionsPage = () => {
     const { data } = useData();
@@ -14,6 +15,8 @@ export const TransactionsPage = () => {
                 <h1 className="text-3xl font-bold tracking-tight">Movimientos</h1>
                 <p className="text-muted-foreground">Historial completo.</p>
             </div>
+
+            <WeeklyBalanceChart />
 
             <Card>
                 <CardHeader>
