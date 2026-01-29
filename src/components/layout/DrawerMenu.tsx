@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink } from 'react-router-dom';
-import { X, ChevronRight, LogOut, Wallet, CreditCard, Goal, Shield, Info } from 'lucide-react';
+import { X, ChevronRight, LogOut, Wallet, CreditCard, Goal, Shield, Info, Settings, Tag } from 'lucide-react';
 import { cn } from '../../utils/utils';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
@@ -79,6 +79,12 @@ export const DrawerMenu = ({ isOpen, onClose }: DrawerMenuProps) => {
 
                     <div className="my-4 h-px bg-white/5 mx-2" />
 
+                    <DrawerItem to="/profile" icon={<Shield size={20} />} label="Seguridad y Datos" onClick={onClose} />
+
+                    <div className="my-4 h-px bg-white/5 mx-2" />
+
+                    <DrawerItem to="/categories" icon={<Tag size={20} />} label="Categorías" onClick={onClose} />
+                    <DrawerItem to="/settings" icon={<Settings size={20} />} label="Configuración" onClick={onClose} />
                     <DrawerItem to="/profile" icon={<Shield size={20} />} label="Seguridad y Datos" onClick={onClose} />
 
                     <div className="my-4 h-px bg-white/5 mx-2" />

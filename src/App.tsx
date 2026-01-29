@@ -11,6 +11,7 @@ import { GoalsPage } from './pages/GoalsPage';
 import { CategoriesPage } from './pages/CategoriesPage';
 import { DebtsPage } from './pages/DebtsPage';
 import { CalendarPage } from './pages/CalendarPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -81,6 +82,13 @@ function App() {
               <ProtectedRoute>
                 <AppShell>
                   <ProfilePage />
+                </AppShell>
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <AppShell>
+                  <SettingsPage />
                 </AppShell>
               </ProtectedRoute>
             } />
