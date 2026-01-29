@@ -1,4 +1,4 @@
-import { MoreHorizontal, ChevronLeft, ChevronRight, CreditCard as CardIcon, Wallet, Landmark, Banknote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CreditCard as CardIcon, Wallet, Landmark, Banknote } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useData } from '../../context/DataContext';
 import { formatCurrency } from '../../utils/utils';
@@ -17,7 +17,7 @@ export const BalanceWidget = () => {
 
     // Prepare list of items to show: Total + Individual Accounts
     const items = [
-        { id: 'total', name: 'Saldo Total', balance: totalBalance, type: 'total', currency: 'PEN' },
+        { id: 'total', name: 'Saldo Total', balance: totalBalance, type: 'total', currency: 'PEN', creditLimit: undefined },
         ...data.accounts.map(acc => ({
             id: acc.id,
             name: acc.name,
