@@ -13,7 +13,7 @@ export interface TransactionFormProps {
 }
 
 export const TransactionForm = ({ onSuccess, onCancel, initialValues }: TransactionFormProps) => {
-    const { addTransaction, data } = useData();
+    const { addTransaction, addCategory, data } = useData();
     const [type, setType] = useState<TransactionType>(initialValues?.type || 'expense');
     const [amount, setAmount] = useState(initialValues?.amount?.toString() || '');
     const [concept, setConcept] = useState(initialValues?.concept || '');
@@ -105,16 +105,51 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
 
             {/* CATEGORY: Only for Income and Expense */}
             {(type === 'income' || type === 'expense') && (
-                <Select
-                    label="Categoría"
-                    value={categoryId}
-                    onChange={e => setCategoryId(e.target.value)}
-                    options={[
-                        { value: '', label: 'Seleccionar...' },
-                        ...categories.map(c => ({ value: c.id, label: c.name }))
-                    ]}
-                    required
-                />
+                <div className="space-y-1">
+                    <Select
+                        label="Categoría"
+                        value={categoryId}
+                        onChange={e => {
+                            if (e.target.value === 'NEW_CATEGORY') {
+                                // Trigger logic to add new category
+                                // Since we are in a modal, maybe we replace the current form with a small 'Add Category' input or route to categories?
+                                // Let's try a simple prompt for now, or use a nested state.
+                                const name = prompt("Nombre de la nueva categoría:");
+                                if (name) {
+                                    // We need to access addCategory from useData, but verify if it's destructured
+                                    // It is not. need to update useData call
+                                    // Since I can't easily change the destructuring without reading the file again (risk of changing too much),
+                                    // I will stick to just showing the button to GO to categories page or handle it via a new prop/function if I edit the file.
+                                    // Wait, let's fix the destructuring first.
+                                }
+                            } else {
+                                setCategoryId(e.target.value);
+                            }
+                        }}
+                        options={[
+                            { value: '', label: 'Seleccionar...' },
+                            ...categories.map(c => ({ value: c.id, label: c.name })),
+                        ]}
+                        required
+                    />
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            const name = prompt("Nombre de la nueva categoría:");
+                            if (name && name.trim()) {
+                                await addCategory({
+                                    name: name.trim(),
+                                    isFixed: false,
+                                    icon: 'tag',
+                                    color: '#ffffff'
+                                });
+                            }
+                        }}
+                        className="text-xs text-primary font-bold hover:underline"
+                    >
+                        + Crear nueva categoría rápida
+                    </button>
+                </div>
             )}
 
             {/* FROM ACCOUNT: For Expense, Transfer, Debt Payment */}
