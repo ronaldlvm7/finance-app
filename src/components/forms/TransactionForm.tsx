@@ -30,19 +30,47 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
     const categories = data.categories;
     const activeDebts = data.debts.filter(d => d.status === 'active');
 
+    // Reset states when type changes
+    React.useEffect(() => {
+        // Keep date, but reset others to avoid UI artifacts
+        setCategoryId('');
+        setFromAccountId('');
+        setToAccountId('');
+        setDebtId('');
+        setPaymentMethod('cash');
+        // Concept and amount can persist for convenience
+    }, [type]);
+
+    // Auto-detect Credit Card "Payment Method"
+    React.useEffect(() => {
+        if (!fromAccountId) return;
+        const account = accounts.find(a => a.id === fromAccountId);
+        if (account?.type === 'credit_card') {
+            setPaymentMethod('credit'); // Enforce Credit
+        } else {
+            setPaymentMethod('cash'); // Default back to cash
+        }
+    }, [fromAccountId, accounts]);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!amount || !concept) return;
+
+        // Validation for Category
+        if ((type === 'income' || type === 'expense') && !categoryId) {
+            alert("Por favor selecciona una categoría");
+            return;
+        }
 
         addTransaction({
             date,
             type,
             amount: Number(amount),
             concept,
-            categoryId: type === 'income' || type === 'expense' ? categoryId : undefined,
+            categoryId: (type === 'income' || type === 'expense') ? categoryId : undefined,
             fromAccountId: type === 'income' ? undefined : fromAccountId,
-            toAccountId: type === 'expense' || type === 'debt_payment' ? undefined : toAccountId,
+            toAccountId: (type === 'expense' || type === 'debt_payment') ? undefined : toAccountId,
             paymentMethod: type === 'expense' ? paymentMethod : undefined,
             debtId: type === 'debt_payment' ? debtId : undefined,
         });
@@ -107,22 +135,28 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
             {type === 'expense' && (
                 <div className="space-y-2">
                     <label className="text-sm font-medium">Método de Pago</label>
-                    <div className="flex gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setPaymentMethod('cash')}
-                            className={`flex-1 py-2 text-sm border rounded-lg ${paymentMethod === 'cash' ? 'border-primary bg-primary/10 text-primary font-bold' : 'border-border'}`}
-                        >
-                            Efectivo / Débito
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setPaymentMethod('credit')}
-                            className={`flex-1 py-2 text-sm border rounded-lg ${paymentMethod === 'credit' ? 'border-purple-500 bg-purple-500/10 text-purple-500 font-bold' : 'border-border'}`}
-                        >
-                            Crédito (Genera Deuda)
-                        </button>
-                    </div>
+                    {accounts.find(a => a.id === fromAccountId)?.type === 'credit_card' ? (
+                        <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-lg text-purple-400 text-sm font-bold flex items-center gap-2">
+                            💳 Pagando con Crédito (Automático)
+                        </div>
+                    ) : (
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMethod('cash')}
+                                className={`flex-1 py-2 text-sm border rounded-lg ${paymentMethod === 'cash' ? 'border-primary bg-primary/10 text-primary font-bold' : 'border-border'}`}
+                            >
+                                Efectivo / Débito
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMethod('credit')}
+                                className={`flex-1 py-2 text-sm border rounded-lg ${paymentMethod === 'credit' ? 'border-purple-500 bg-purple-500/10 text-purple-500 font-bold' : 'border-border'}`}
+                            >
+                                Crédito (Genera Deuda)
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 

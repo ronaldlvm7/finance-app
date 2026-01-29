@@ -4,9 +4,19 @@ import { cn } from '../../utils/utils';
 import { useState } from 'react';
 import { DrawerMenu } from './DrawerMenu';
 import { CreditCard, Goal } from 'lucide-react'; // Imports for SidebarItem
+import { Modal } from '../ui/Modal';
+import { TransactionForm } from '../forms/TransactionForm';
 
 export const AppShell = ({ children }: { children?: React.ReactNode }) => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+
+    // Listen for Global FAB Click
+    useState(() => {
+        const handleOpenModal = () => setIsTransactionModalOpen(true);
+        window.addEventListener('OPEN_GHOST_TRANSACTION_MODAL', handleOpenModal);
+        return () => window.removeEventListener('OPEN_GHOST_TRANSACTION_MODAL', handleOpenModal);
+    });
 
     return (
         <div className="flex flex-col h-screen w-full bg-background text-foreground overflow-hidden">
@@ -27,6 +37,18 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                     {children || <Outlet />}
                 </div>
             </main>
+
+            {/* Global Transaction Modal */}
+            <Modal
+                isOpen={isTransactionModalOpen}
+                onClose={() => setIsTransactionModalOpen(false)}
+                title="Nuevo Movimiento"
+            >
+                <TransactionForm
+                    onSuccess={() => setIsTransactionModalOpen(false)}
+                    onCancel={() => setIsTransactionModalOpen(false)}
+                />
+            </Modal>
 
             {/* Bottom Navigation (Mobile) */}
             <nav className="md:hidden fixed bottom-6 left-4 right-4 h-16 bg-card/90 backdrop-blur-xl border border-white/10 rounded-2xl z-40 flex items-center justify-between px-4 shadow-2xl shadow-black/50">
