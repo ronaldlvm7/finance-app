@@ -387,7 +387,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const clearAllData = async () => {
-        // No-op for cloud
+        if (!authUser) return;
+
+        try {
+            // Delete in order to avoid FK constraints
+            await supabase.from('transactions').delete().eq('user_id', authUser.id);
+            await supabase.from('debts').delete().eq('user_id', authUser.id);
+            await supabase.from('goals').delete().eq('user_id', authUser.id);
+            await supabase.from('accounts').delete().eq('user_id', authUser.id);
+            await supabase.from('categories').delete().eq('user_id', authUser.id);
+
+            // Refetch (will be empty)
+            fetchData();
+        } catch (error) {
+            console.error("Error clearing data:", error);
+        }
     };
 
     return (
