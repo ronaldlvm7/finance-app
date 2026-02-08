@@ -342,6 +342,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             current_balance: debt.currentBalance,
             status: debt.status,
             start_date: debt.startDate,
+            due_date: debt.dueDate,
             installments: debt.installments,
             account_id: debt.accountId
         });
@@ -350,9 +351,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updateDebt = async (debt: Debt) => {
         await supabase.from('debts').update({
+            name: debt.name,
+            total_amount: debt.totalAmount,
             current_balance: debt.currentBalance,
             installments_paid: debt.installmentsPaid,
-            status: debt.status
+            status: debt.status,
+            start_date: debt.startDate,
+            due_date: debt.dueDate,
+            installments: debt.installments
         }).eq('id', debt.id);
         fetchData();
     };
