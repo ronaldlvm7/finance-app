@@ -25,11 +25,11 @@ export const CreditCardWidget = () => {
     // Check if balance is tracked as 'Available Limit' or 'Current Balance' (often negative).
     // In our seed/logic: 'balance' for CC usually means "Available Credit".
     // Let's assume 'balance' is Available Amount.
-    const available = currentCard.balance;
+    // Fix: 'balance' in seed might be 0. We want Available = Limit - Debt
     const limit = currentCard.creditLimit || 0;
-
     // Sum of linked debts. 
     const verifiedDebt = cardDebts.reduce((sum, d) => sum + d.currentBalance, 0);
+    const available = limit - verifiedDebt;
 
     const utilization = limit > 0 ? (verifiedDebt / limit) * 100 : 0;
 

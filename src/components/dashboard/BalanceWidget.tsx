@@ -10,22 +10,38 @@ export const BalanceWidget = () => {
     const { data } = useData();
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    // Calculate Total Liquid Balance
+    // Calculate Total Liquid Balance (Cash + Bank only)
     const totalBalance = data.accounts
         .filter(acc => acc.type !== 'credit_card')
         .reduce((sum, acc) => sum + acc.balance, 0);
 
     // Prepare list of items to show: Total + Individual Accounts
     const items = [
-        { id: 'total', name: 'Saldo Total', balance: totalBalance, type: 'total', currency: 'PEN', creditLimit: undefined },
-        ...data.accounts.map(acc => ({
-            id: acc.id,
-            name: acc.name,
-            balance: acc.balance,
-            type: acc.type,
-            currency: 'PEN',
-            creditLimit: acc.creditLimit
-        }))
+        { id: 'total', name: 'Saldo Total', balance: totalBalance, type: 'total', currency: 'PEN', creditLimit: undefined, displayLabel: 'Saldo Total' },
+        ...data.accounts.map(acc => {
+            // For credit cards, we want to show AVAILABLE balance, not current debt/balance
+            let displayBalance = acc.balance;
+            let displayLabel = 'Saldo';
+
+            if (acc.type === 'credit_card') {
+                const limit = acc.creditLimit || 0;
+                // Calculate debt specific to this account
+                const accountDebts = data.debts.filter(d => d.accountId === acc.id && d.status === 'active');
+                const totalDebt = accountDebts.reduce((sum, d) => sum + d.currentBalance, 0);
+                displayBalance = limit - totalDebt;
+                displayLabel = 'Disponible';
+            }
+
+            return {
+                id: acc.id,
+                name: acc.name,
+                balance: displayBalance,
+                type: acc.type,
+                currency: 'PEN',
+                creditLimit: acc.creditLimit,
+                displayLabel
+            };
+        })
     ];
 
     const currentItem = items[currentIndex];
@@ -73,9 +89,14 @@ export const BalanceWidget = () => {
             </div>
 
             <div className="pl-2 relative z-10">
-                <span className="text-4xl font-bold tracking-tight text-[#5D5FEF]">{formatCurrency(currentItem.balance)}</span>
-                {currentItem.type === 'credit_card' && currentItem.creditLimit && (
-                    <p className="text-xs text-gray-500 mt-1">Límite: {formatCurrency(currentItem.creditLimit)}</p>
+                <span className={`text-4xl font-bold tracking-tight ${currentItem.type === 'credit_card' ? 'text-emerald-500' : 'text-[#5D5FEF]'}`}>
+                    {formatCurrency(currentItem.balance)}
+                </span>
+                {currentItem.type === 'credit_card' && (
+                    <div className="flex flex-col mt-1">
+                        <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{currentItem.displayLabel}</p>
+                        {currentItem.creditLimit && <p className="text-[10px] text-gray-400">Límite: {formatCurrency(currentItem.creditLimit)}</p>}
+                    </div>
                 )}
             </div>
 

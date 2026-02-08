@@ -63,6 +63,31 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
             return;
         }
 
+        // Validation for Insufficient Funds
+        if (type === 'expense') {
+            const account = accounts.find(a => a.id === fromAccountId);
+            if (account) {
+                if (account.type === 'credit_card') {
+                    // Check Credit Limit Availability
+                    const limit = account.creditLimit || 0;
+                    const accountDebts = data.debts.filter(d => d.accountId === account.id && d.status === 'active');
+                    const currentDebt = accountDebts.reduce((sum, d) => sum + d.currentBalance, 0);
+                    const available = limit - currentDebt;
+
+                    if (Number(amount) > available) {
+                        alert(`Fondos insuficientes. Tu tarjeta ${account.name} solo tiene ${available.toFixed(2)} disponible.`);
+                        return;
+                    }
+                } else {
+                    // Check Cash/Bank Balance
+                    if (Number(amount) > account.balance) {
+                        alert(`Fondos insuficientes. Tu cuenta ${account.name} solo tiene ${account.balance.toFixed(2)} disponible.`);
+                        return;
+                    }
+                }
+            }
+        }
+
         addTransaction({
             date,
             type,
