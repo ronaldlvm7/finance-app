@@ -38,7 +38,35 @@ export const CalendarPage = () => {
     // Helpers
     const getEventsForDay = (day: Date) => {
         const dayTransactions = monthTransactions.filter(t => isSameDay(parseISO(t.date), day));
-        const dayDebts = activeDebts.filter(d => d.dueDate === day.getDate());
+
+        const dayDebts = activeDebts.filter(debt => {
+            // 1. Verificar que el día del mes coincida
+            if (debt.dueDate !== day.getDate()) return false;
+
+            // 2. Verificar que sea después o igual a la fecha de inicio
+            if (debt.startDate) {
+                const startDate = parseISO(debt.startDate);
+                // Si el día del calendario es antes de la fecha de inicio, no mostrar
+                if (day < startDate) return false;
+            }
+
+            // 3. Para deudas con cuotas (no suscripciones), verificar límite
+            if (debt.type !== 'subscription' && debt.installments && debt.startDate) {
+                const startDate = parseISO(debt.startDate);
+
+                // Calcular cuántos meses han pasado desde la fecha de inicio
+                const yearsDiff = day.getFullYear() - startDate.getFullYear();
+                const monthsDiff = day.getMonth() - startDate.getMonth();
+                const totalMonthsPassed = yearsDiff * 12 + monthsDiff;
+
+                // Si han pasado más meses que cuotas, no mostrar
+                // (totalMonthsPassed = 0 significa el primer mes, 1 el segundo, etc.)
+                if (totalMonthsPassed >= debt.installments) return false;
+            }
+
+            return true;
+        });
+
         return { transactions: dayTransactions, debts: dayDebts };
     };
 
