@@ -110,6 +110,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 currentBalance: Number(item.current_balance),
                 status: item.status,
                 startDate: item.start_date,
+                dueDate: item.due_date,
                 installments: item.installments,
                 installmentsPaid: item.installments_paid,
                 accountId: item.account_id
