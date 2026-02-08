@@ -26,6 +26,15 @@ export const DebtForm: React.FC<DebtFormProps> = ({ onSuccess, onCancel, initial
         const amountVal = parseFloat(totalAmount);
         if (!name || isNaN(amountVal) || amountVal <= 0) return;
 
+        // Date Validation for Recurring Payments
+        const start = new Date(`${startDate}T12:00:00`); // Force noon to avoid timezone shift issues
+        const dayOfMonth = start.getDate();
+
+        if (dayOfMonth > 28) {
+            alert("Para pagos recurrentes, por favor selecciona una fecha de inicio entre el día 1 y el 28. Esto asegura que el pago se pueda programar correctamente en todos los meses (incluso febrero).");
+            return;
+        }
+
         const debtData: Omit<Debt, 'id'> = {
             name,
             totalAmount: amountVal, // For sub, this is monthly cost. For debt, total principal.
@@ -33,6 +42,7 @@ export const DebtForm: React.FC<DebtFormProps> = ({ onSuccess, onCancel, initial
             type,
             status: 'active',
             startDate,
+            dueDate: dayOfMonth, // Save the recurring day
             installments: isSubscription ? undefined : parseInt(installments) || 1,
             installmentsPaid: 0
         };
