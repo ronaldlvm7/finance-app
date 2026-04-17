@@ -34,9 +34,6 @@ export const TransactionsPage = () => {
         return matchMonth && matchType && matchSearch;
     });
 
-    const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-    const expenses = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-
     const monthLabel = format(currentMonth, 'MMMM yyyy', { locale: es });
 
     const getIcon = (type: string) => {
@@ -132,29 +129,7 @@ export const TransactionsPage = () => {
                 </button>
             </div>
 
-            {/* Summary pills */}
-            <div className="grid grid-cols-2 gap-3">
-                <div className="bg-card rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
-                        <ArrowDownLeft size={16} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-muted-foreground">Ingresos</p>
-                        <p className="text-sm font-bold text-emerald-400">{formatCurrency(income)}</p>
-                    </div>
-                </div>
-                <div className="bg-card rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-red-500/15 flex items-center justify-center text-red-400 shrink-0">
-                        <ArrowUpRight size={16} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-muted-foreground">Gastos</p>
-                        <p className="text-sm font-bold text-red-400">{formatCurrency(expenses)}</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Weekly Chart */}
+            {/* Weekly Chart (ya incluye resumen de ingresos/egresos) */}
             <WeeklyBalanceChart />
 
             {/* Filter Pills */}
