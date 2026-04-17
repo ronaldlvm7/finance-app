@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Target, Trash2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Sparkles } from 'lucide-react';
 import { formatCurrency } from '../utils/utils';
 import { useData } from '../context/DataContext';
 import { Modal } from '../components/ui/Modal';
