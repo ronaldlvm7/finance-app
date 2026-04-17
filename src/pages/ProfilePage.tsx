@@ -84,7 +84,7 @@ export const ProfilePage = () => {
                     >
                         <LogOut size={20} /> Cerrar Sesión
                     </button>
-                    <p className="text-center text-xs text-muted-foreground/30 mt-4">v1.1.0 Finance App</p>
+                    <p className="text-center text-xs text-muted-foreground/30 mt-4">Finance App v2.0.0</p>
                 </div>
             </div>
 
@@ -99,17 +99,18 @@ export const ProfilePage = () => {
             </Modal>
 
             {/* Security Modal */}
-            <Modal isOpen={isSecurityOpen} onClose={() => setIsSecurityOpen(false)} title="Seguridad">
+            <Modal isOpen={isSecurityOpen} onClose={() => setIsSecurityOpen(false)} title="Seguridad y Privacidad">
                 <div className="space-y-4 text-sm text-gray-300">
                     <div className="bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20 text-emerald-400 flex gap-3">
-                        <Shield className="shrink-0" />
-                        <p>Tus datos están encriptados y almacenados localmente en este dispositivo.</p>
+                        <Shield className="shrink-0 mt-0.5" />
+                        <p>Tu cuenta está protegida con autenticación segura vía Supabase. Solo tú puedes acceder a tus datos.</p>
                     </div>
-                    <p>Esta aplicación funciona bajo una filosofía <strong>Local-First</strong> (Primero Local). Esto significa que:</p>
+                    <p>Esta aplicación almacena tus datos en la nube mediante <strong>Supabase</strong>. Esto significa que:</p>
                     <ul className="list-disc pl-5 space-y-2 text-gray-400">
-                        <li>No enviamos tus datos financieros a la nube.</li>
-                        <li>Nadie más que tú tiene acceso a tu información.</li>
-                        <li>Si borras el caché de tu navegador, asegúrate de haber exportado un respaldo en Excel.</li>
+                        <li>Tus finanzas están disponibles desde cualquier dispositivo.</li>
+                        <li>Los datos se sincronizan en tiempo real con tu cuenta.</li>
+                        <li>Solo tú, con tu usuario y contraseña, tienes acceso.</li>
+                        <li>Puedes exportar un respaldo en Excel desde Configuración en cualquier momento.</li>
                     </ul>
                 </div>
             </Modal>

@@ -1,12 +1,12 @@
 
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, isToday, parseISO, isAfter, startOfDay, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, ArrowUpCircle, ArrowDownCircle, AlertCircle, RefreshCw, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpCircle, ArrowDownCircle, AlertCircle, RefreshCw, Plus, Bell } from 'lucide-react';
 import { Modal } from '../components/ui/Modal';
 import { TransactionForm } from '../components/forms/TransactionForm';
-import { cn } from '../utils/utils';
+import { cn, formatCurrency } from '../utils/utils';
 import type { Debt } from '../types';
 
 export const CalendarPage = () => {
@@ -174,6 +174,9 @@ export const CalendarPage = () => {
                 </div>
             </div>
 
+            {/* Upcoming Events This Month */}
+            <UpcomingEvents activeDebts={activeDebts} currentDate={currentDate} onPayDebt={(debt) => { setSelectedDebtToPay(debt); setIsPayModalOpen(true); }} />
+
             {/* Day Details Modal */}
             <Modal
                 isOpen={isDetailsOpen}
@@ -321,6 +324,93 @@ export const CalendarPage = () => {
                     />
                 )}
             </Modal>
+        </div>
+    );
+};
+
+interface UpcomingEventsProps {
+    activeDebts: Debt[];
+    currentDate: Date;
+    onPayDebt: (debt: Debt) => void;
+}
+
+const UpcomingEvents = ({ activeDebts, currentDate, onPayDebt }: UpcomingEventsProps) => {
+    const today = startOfDay(new Date());
+    const isSameDisplayMonth = isSameMonth(currentDate, today);
+
+    // Only show upcoming events for current month view
+    const upcoming = activeDebts
+        .filter(debt => {
+            if (!debt.dueDate) return false;
+            // Build the next occurrence date for this debt in the current month
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const day = Math.min(debt.dueDate, new Date(year, month + 1, 0).getDate());
+            const nextDate = new Date(year, month, day);
+            // Only show if in the future (today or later) when viewing current month
+            if (isSameDisplayMonth && !isAfter(nextDate, addDays(today, -1))) return false;
+            return true;
+        })
+        .sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0))
+        .slice(0, 5);
+
+    if (upcoming.length === 0) return null;
+
+    return (
+        <div className="space-y-3 pb-6">
+            <div className="flex items-center gap-2 px-1">
+                <Bell size={14} className="text-orange-400" />
+                <h3 className="text-sm font-semibold text-muted-foreground">
+                    {isSameDisplayMonth ? 'Próximos vencimientos' : `Vencimientos — ${format(currentDate, 'MMMM', { locale: es })}`}
+                </h3>
+            </div>
+            <div className="space-y-2">
+                {upcoming.map(debt => {
+                    const year = currentDate.getFullYear();
+                    const month = currentDate.getMonth();
+                    const day = Math.min(debt.dueDate!, new Date(year, month + 1, 0).getDate());
+                    const dueDate = new Date(year, month, day);
+                    const isOverdue = isSameDisplayMonth && !isAfter(dueDate, addDays(today, -1));
+
+                    return (
+                        <div
+                            key={debt.id}
+                            className={cn(
+                                "flex items-center justify-between p-3.5 rounded-2xl border",
+                                isOverdue
+                                    ? "bg-red-500/10 border-red-500/20"
+                                    : "bg-card border-white/5"
+                            )}
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className={cn(
+                                    "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold",
+                                    isOverdue ? "bg-red-500/20 text-red-400" : "bg-orange-500/15 text-orange-400"
+                                )}>
+                                    {debt.dueDate}
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-sm">{debt.name}</p>
+                                    <p className="text-[11px] text-muted-foreground">
+                                        {debt.type === 'subscription' ? 'Suscripción' : 'Deuda'} • día {debt.dueDate} de cada mes
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-orange-300">{formatCurrency(debt.type === 'subscription' ? debt.totalAmount : debt.currentBalance)}</p>
+                                {isSameDisplayMonth && (
+                                    <button
+                                        onClick={() => onPayDebt(debt)}
+                                        className="px-2.5 py-1.5 bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white text-[11px] font-bold rounded-lg transition-all"
+                                    >
+                                        Pagar
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };

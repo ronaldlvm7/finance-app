@@ -5,11 +5,8 @@
 @layer base {
   :root {
     --background: 240 10% 3.9%;
-    /* Deep dark background */
     --foreground: 0 0% 98%;
-    /* --card: 240 10% 6%; */
     --card: 0 0% 9%;
-    /* Slightly lighter than background */
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
@@ -34,33 +31,70 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 28 100% 63%;
-    /* Match primary for rings */
 
-    /* Chart / Progress Colors */
     --chart-1: 217 91% 60%;
-    /* Blue #3B82F6 */
     --chart-2: 340 82% 52%;
-    /* Pink #E91E63 */
     --chart-3: 40 100% 50%;
-    /* Yellow #FFC107 */
     --chart-4: 142 71% 45%;
-    /* Green #22C55E */
     --chart-5: 28 100% 63%;
-    /* Orange */
 
     --radius: 1rem;
-    /* More rounded corners */
+
+    /* iPhone safe area insets */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    /* Remove gray tap flash on iOS */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    /* Prevent font size boost on orientation change (iOS) */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* Smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent overscroll bounce on body (keep it on scroll containers) */
+    overscroll-behavior: none;
   }
+
+  /* Prevent iOS input zoom — inputs must be 16px+ */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Better focus ring for accessibility (not the default iOS blue) */
+  :focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+}
+
+/* Utility: full dynamic viewport height (fixes iOS Safari address bar) */
+.h-dvh {
+  height: 100dvh;
+}
+.min-h-dvh {
+  min-height: 100dvh;
+}
+
+/* Utility: safe area padding helpers */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
 }
 
 .glass-panel {

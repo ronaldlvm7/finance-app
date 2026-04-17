@@ -72,7 +72,7 @@ export const SettingsPage = () => {
             </div>
 
             <div className="text-center p-4">
-                <p className="text-xs text-muted-foreground/30">Finance App v1.2.0 • Local-First</p>
+                <p className="text-xs text-muted-foreground/30">Finance App v2.0.0 • Powered by Supabase</p>
             </div>
         </div>
     );

@@ -30,6 +30,7 @@ interface DataContextType {
     deleteCategory: (id: string) => Promise<void>;
     setBudget: (budget: Budget) => Promise<void>;
     addGoal: (goal: Omit<Goal, 'id'>) => Promise<void>;
+    deleteGoal: (id: string) => Promise<void>;
     clearAllData: () => Promise<void>;
 }
 
@@ -417,6 +418,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetchData();
     };
 
+    const deleteGoal = async (id: string) => {
+        if (!authUser) return;
+        await supabase.from('goals').delete().eq('id', id);
+        fetchData();
+    };
+
     const clearAllData = async () => {
         if (!authUser) return;
 
@@ -498,6 +505,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             deleteCategory,
             setBudget,
             addGoal,
+            deleteGoal,
             clearAllData
         }}>
             {children}

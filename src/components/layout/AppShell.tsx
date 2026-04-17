@@ -1,9 +1,9 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { Home, Wallet, User, Plus, CalendarRange, Menu } from 'lucide-react';
+import { Home, Wallet, User, Plus, CalendarRange, Menu, Target } from 'lucide-react';
 import { cn } from '../../utils/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DrawerMenu } from './DrawerMenu';
-import { CreditCard, Goal } from 'lucide-react'; // Imports for SidebarItem
+import { CreditCard } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { TransactionForm } from '../forms/TransactionForm';
 
@@ -11,19 +11,20 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
 
-    // Listen for Global FAB Click
-    useState(() => {
+    useEffect(() => {
         const handleOpenModal = () => setIsTransactionModalOpen(true);
         window.addEventListener('OPEN_GHOST_TRANSACTION_MODAL', handleOpenModal);
         return () => window.removeEventListener('OPEN_GHOST_TRANSACTION_MODAL', handleOpenModal);
-    });
+    }, []);
 
     return (
-        <div className="flex flex-col h-screen w-full bg-background text-foreground overflow-hidden">
+        <div className="flex flex-col h-dvh w-full bg-background text-foreground overflow-hidden">
             <DrawerMenu isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
 
-            {/* Mobile Header with Hamburger */}
-            <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-md flex items-center justify-between px-4 z-30 border-b border-white/5">
+            {/* Mobile Header — pt-safe respects iPhone notch/Dynamic Island */}
+            <header className="md:hidden fixed top-0 left-0 right-0 bg-card/80 backdrop-blur-md flex items-center justify-between px-4 z-30 border-b border-white/5 pt-safe"
+                style={{ paddingTop: `max(env(safe-area-inset-top, 0px), 0px)`, height: 'calc(4rem + env(safe-area-inset-top, 0px))' }}
+            >
                 <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-muted-foreground hover:text-white">
                     <Menu size={24} />
                 </button>
@@ -31,8 +32,11 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                 <div className="w-10" /> {/* Spacer to center title */}
             </header>
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto pb-24 pt-16 md:pt-0 md:pb-0 md:pl-64">
+            {/* Main Content Area — pb-36 ensures content clears the floating bottom nav + iPhone home bar */}
+            <main
+                className="flex-1 overflow-y-auto md:pt-0 md:pb-0 md:pl-64"
+                style={{ paddingTop: 'calc(4rem + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}
+            >
                 <div className="container max-w-lg mx-auto p-4 md:max-w-4xl md:p-8">
                     {children || <Outlet />}
                 </div>
@@ -50,8 +54,11 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                 />
             </Modal>
 
-            {/* Bottom Navigation (Mobile) */}
-            <nav className="md:hidden fixed bottom-6 left-4 right-4 h-16 bg-card/90 backdrop-blur-xl border border-white/10 rounded-2xl z-40 flex items-center justify-between px-4 shadow-2xl shadow-black/50">
+            {/* Bottom Navigation — positioned above iPhone home indicator */}
+            <nav
+                className="md:hidden fixed left-4 right-4 h-16 bg-card/90 backdrop-blur-xl border border-white/10 rounded-2xl z-40 flex items-center justify-between px-4 shadow-2xl shadow-black/50"
+                style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+            >
                 <NavItem to="/" icon={<Home size={22} />} label="Home" />
                 <NavItem to="/transactions" icon={<Wallet size={22} />} label="Movimientos" />
 
@@ -62,8 +69,11 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                 <NavItem to="/profile" icon={<User size={22} />} label="Perfil" />
             </nav>
 
-            {/* FAB (Floating Action Button) - Centered and Raised */}
-            <div className="md:hidden fixed bottom-10 left-1/2 -translate-x-1/2 z-50">
+            {/* FAB — raised above bottom nav, respects iPhone home bar */}
+            <div
+                className="md:hidden fixed left-1/2 -translate-x-1/2 z-50"
+                style={{ bottom: 'calc(2.75rem + env(safe-area-inset-bottom, 0px))' }}
+            >
                 <button
                     onClick={() => window.dispatchEvent(new CustomEvent('OPEN_GHOST_TRANSACTION_MODAL'))}
                     className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg shadow-accent/40 hover:scale-110 active:scale-95 transition-all outline-none ring-4 ring-background"
@@ -84,9 +94,9 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                 <div className="space-y-1">
                     <SidebarItem to="/" icon={<Home size={20} />} label="Dashboard" />
                     <SidebarItem to="/transactions" icon={<Wallet size={20} />} label="Movimientos" />
-                    <SidebarItem to="/goals" icon={<Goal size={20} />} label="Metas" />
+                    <SidebarItem to="/goals" icon={<Target size={20} />} label="Metas" />
                     <SidebarItem to="/cards" icon={<CreditCard size={20} />} label="Tarjetas" />
-                    <SidebarItem to="/debts" icon={<CreditCard size={20} />} label="Deudas" />
+                    <SidebarItem to="/debts" icon={<Wallet size={20} />} label="Deudas" />
                     <SidebarItem to="/calendar" icon={<CalendarRange size={20} />} label="Calendario" />
                     <SidebarItem to="/profile" icon={<User size={20} />} label="Perfil" />
                 </div>
@@ -108,6 +118,7 @@ const NavItem = ({ to, icon, label }: { to: string; icon: React.ReactNode; label
     return (
         <NavLink
             to={to}
+            end={to === '/'}
             className={({ isActive }) =>
                 cn(
                     'flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all duration-300 w-16',
@@ -125,6 +136,7 @@ const SidebarItem = ({ to, icon, label }: { to: string; icon: React.ReactNode; l
     return (
         <NavLink
             to={to}
+            end={to === '/'}
             className={({ isActive }) =>
                 cn(
                     'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium text-sm',

@@ -1,56 +1,237 @@
-
+import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { formatCurrency } from '../utils/utils';
-import { format } from 'date-fns';
+import { format, subMonths, addMonths, isSameMonth, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { WeeklyBalanceChart } from '../components/dashboard/WeeklyBalanceChart';
+import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react';
+
+type FilterType = 'all' | 'income' | 'expense' | 'transfer' | 'debt_payment';
+
+const TYPE_LABELS: Record<FilterType, string> = {
+    all: 'Todos',
+    income: 'Ingresos',
+    expense: 'Gastos',
+    transfer: 'Transferencias',
+    debt_payment: 'Pagos',
+};
 
 export const TransactionsPage = () => {
     const { data } = useData();
-    const transactions = [...data.transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [filterType, setFilterType] = useState<FilterType>('all');
+    const [search, setSearch] = useState('');
+    const [showSearch, setShowSearch] = useState(false);
+
+    const allSorted = [...data.transactions].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+
+    const filtered = allSorted.filter(txn => {
+        const matchMonth = isSameMonth(parseISO(txn.date), currentMonth);
+        const matchType = filterType === 'all' || txn.type === filterType;
+        const matchSearch = !search || txn.concept.toLowerCase().includes(search.toLowerCase());
+        return matchMonth && matchType && matchSearch;
+    });
+
+    const income = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expenses = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+
+    const monthLabel = format(currentMonth, 'MMMM yyyy', { locale: es });
+
+    const getIcon = (type: string) => {
+        switch (type) {
+            case 'income': return <ArrowDownLeft size={18} strokeWidth={2.5} />;
+            case 'expense': return <ArrowUpRight size={18} strokeWidth={2.5} />;
+            default: return <ArrowLeftRight size={18} strokeWidth={2} />;
+        }
+    };
+
+    const getIconStyle = (type: string) => {
+        switch (type) {
+            case 'income': return 'bg-emerald-500/15 text-emerald-400';
+            case 'expense': return 'bg-red-500/15 text-red-400';
+            case 'debt_payment': return 'bg-orange-500/15 text-orange-400';
+            default: return 'bg-blue-500/15 text-blue-400';
+        }
+    };
+
+    const getAmountStyle = (type: string) => {
+        switch (type) {
+            case 'income': return 'text-emerald-400';
+            case 'expense': return 'text-red-400';
+            case 'debt_payment': return 'text-orange-400';
+            default: return 'text-blue-400';
+        }
+    };
+
+    const getAmountPrefix = (type: string) => {
+        switch (type) {
+            case 'income': return '+';
+            case 'expense': return '-';
+            case 'debt_payment': return '-';
+            default: return '';
+        }
+    };
+
+    // Group transactions by date
+    const grouped = filtered.reduce<Record<string, typeof filtered>>((acc, txn) => {
+        const key = format(parseISO(txn.date), 'yyyy-MM-dd');
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(txn);
+        return acc;
+    }, {});
+
+    const groupedEntries = Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a));
 
     return (
-        <div className="space-y-6 pb-20 fade-in">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold tracking-tight">Movimientos</h1>
-                <p className="text-muted-foreground">Historial completo.</p>
+        <div className="space-y-5 pb-20 fade-in">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">Movimientos</h1>
+                    <p className="text-muted-foreground text-sm capitalize">{monthLabel}</p>
+                </div>
+                <button
+                    onClick={() => setShowSearch(s => !s)}
+                    className="p-2.5 rounded-xl bg-card border border-white/5 text-muted-foreground hover:text-white transition-colors"
+                >
+                    <SlidersHorizontal size={18} />
+                </button>
             </div>
 
+            {/* Search bar */}
+            {showSearch && (
+                <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Buscar por concepto..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className="w-full bg-card border border-white/5 rounded-xl pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    />
+                </div>
+            )}
+
+            {/* Month Navigator */}
+            <div className="flex items-center justify-between bg-card border border-white/5 rounded-2xl px-4 py-2.5">
+                <button
+                    onClick={() => setCurrentMonth(m => subMonths(m, 1))}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                    <ChevronLeft size={18} className="text-muted-foreground" />
+                </button>
+                <span className="text-sm font-bold capitalize">{monthLabel}</span>
+                <button
+                    onClick={() => setCurrentMonth(m => addMonths(m, 1))}
+                    disabled={isSameMonth(currentMonth, new Date())}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                    <ChevronRight size={18} className="text-muted-foreground" />
+                </button>
+            </div>
+
+            {/* Summary pills */}
+            <div className="grid grid-cols-2 gap-3">
+                <div className="bg-card rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
+                        <ArrowDownLeft size={16} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-muted-foreground">Ingresos</p>
+                        <p className="text-sm font-bold text-emerald-400">{formatCurrency(income)}</p>
+                    </div>
+                </div>
+                <div className="bg-card rounded-2xl p-3.5 border border-white/5 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-red-500/15 flex items-center justify-center text-red-400 shrink-0">
+                        <ArrowUpRight size={16} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-muted-foreground">Gastos</p>
+                        <p className="text-sm font-bold text-red-400">{formatCurrency(expenses)}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Weekly Chart */}
             <WeeklyBalanceChart />
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Últimos Movimientos</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {transactions.length === 0 ? (
-                            <p className="text-center text-muted-foreground py-10">No hay movimientos registrados.</p>
-                        ) : transactions.map(txn => {
-                            const cat = data.categories.find(c => c.id === txn.categoryId);
-                            return (
-                                <div key={txn.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'income' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                                            <span className="text-xs font-bold uppercase">{txn.type.substring(0, 2)}</span>
-                                        </div>
-                                        <div>
-                                            <p className="font-medium">{txn.concept}</p>
-                                            <div className="flex gap-2 text-xs text-muted-foreground">
-                                                <span>{format(new Date(txn.date), 'dd MMM yyyy')}</span>
-                                                {cat && <span>• {cat.name}</span>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className={`font-bold ${txn.type === 'income' ? 'text-green-500' : 'text-foreground'}`}>
-                                        {txn.type === 'income' ? '+' : '-'} {formatCurrency(txn.amount)}
-                                    </div>
+            {/* Filter Pills */}
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {(Object.keys(TYPE_LABELS) as FilterType[]).map(type => (
+                    <button
+                        key={type}
+                        onClick={() => setFilterType(type)}
+                        className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${filterType === type
+                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                            : 'bg-card border border-white/5 text-muted-foreground hover:text-white'
+                            }`}
+                    >
+                        {TYPE_LABELS[type]}
+                    </button>
+                ))}
+            </div>
+
+            {/* Grouped Transactions */}
+            {filtered.length === 0 ? (
+                <div className="py-16 text-center text-muted-foreground">
+                    <ArrowLeftRight size={32} className="mx-auto mb-3 opacity-20" />
+                    <p className="text-sm">Sin movimientos para este período.</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {groupedEntries.map(([dateKey, txns]) => {
+                        const dayTotal = txns.reduce((sum, t) => {
+                            if (t.type === 'income') return sum + t.amount;
+                            if (t.type === 'expense' || t.type === 'debt_payment') return sum - t.amount;
+                            return sum;
+                        }, 0);
+
+                        return (
+                            <div key={dateKey}>
+                                {/* Date divider */}
+                                <div className="flex items-center justify-between mb-2 px-1">
+                                    <p className="text-[11px] font-semibold text-muted-foreground capitalize">
+                                        {format(parseISO(dateKey), "EEEE, d 'de' MMMM", { locale: es })}
+                                    </p>
+                                    <p className={`text-[11px] font-bold ${dayTotal >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        {dayTotal >= 0 ? '+' : ''}{formatCurrency(dayTotal)}
+                                    </p>
                                 </div>
-                            );
-                        })}
-                    </div>
-                </CardContent>
-            </Card>
+
+                                {/* Transactions of this day */}
+                                <div className="bg-card rounded-2xl border border-white/5 overflow-hidden">
+                                    {txns.map((txn, i) => {
+                                        const cat = data.categories.find(c => c.id === txn.categoryId);
+                                        return (
+                                            <div
+                                                key={txn.id}
+                                                className={`flex items-center justify-between px-4 py-3.5 hover:bg-white/3 transition-colors ${i < txns.length - 1 ? 'border-b border-white/5' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getIconStyle(txn.type)}`}>
+                                                        {getIcon(txn.type)}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="font-semibold text-sm truncate">{txn.concept}</p>
+                                                        <p className="text-[11px] text-muted-foreground">
+                                                            {cat ? cat.name : txn.type === 'debt_payment' ? 'Pago de deuda' : txn.type === 'transfer' ? 'Transferencia' : '—'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <p className={`font-bold text-sm shrink-0 ml-2 ${getAmountStyle(txn.type)}`}>
+                                                    {getAmountPrefix(txn.type)}{formatCurrency(txn.amount)}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };
