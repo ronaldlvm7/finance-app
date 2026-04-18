@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { Settings, Trash2, Tag, Download, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Settings, Trash2, Tag, Download, ChevronRight, AlertTriangle, Sun, Moon } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../context/ThemeContext';
 import { exportDataToExcel } from '../utils/utils';
 
 export const SettingsPage = () => {
     const navigate = useNavigate();
     const { data, clearAllData } = useData();
+    const { theme, toggleTheme } = useTheme();
 
     const handleReset = async () => {
         if (confirm('PELIGRO: ¿Estás seguro de que quieres borrar TODOS los datos de la aplicación? Esto incluye movimientos, cuentas, deudas y categorías personalizadas. Esta acción es irreversible.')) {
@@ -28,6 +30,34 @@ export const SettingsPage = () => {
                 </div>
             </div>
 
+            {/* Apariencia */}
+            <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider ml-1">Apariencia</h3>
+                <Card className="overflow-hidden">
+                    <div className="w-full p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="p-2 bg-secondary rounded-lg text-foreground">
+                                {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                            </div>
+                            <div>
+                                <span className="font-medium">Tema</span>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    {theme === 'dark' ? 'Modo oscuro activo' : 'Modo claro activo'}
+                                </p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={toggleTheme}
+                            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${theme === 'light' ? 'bg-primary' : 'bg-secondary'}`}
+                        >
+                            <span
+                                className={`inline-block h-5 w-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ${theme === 'light' ? 'translate-x-6' : 'translate-x-1'}`}
+                            />
+                        </button>
+                    </div>
+                </Card>
+            </div>
+
             {/* General Settings */}
             <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider ml-1">General</h3>
@@ -38,7 +68,6 @@ export const SettingsPage = () => {
                         description="Crea, edita o elimina tus categorías."
                         onClick={() => navigate('/categories')}
                     />
-                    {/* Future: Coin currency, Language, etc. */}
                 </Card>
             </div>
 

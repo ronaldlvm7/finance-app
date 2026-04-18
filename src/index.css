@@ -46,6 +46,35 @@
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
   }
+
+  /* Light mode */
+  .light {
+    --background: 220 20% 97%;
+    --foreground: 240 10% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 8%;
+
+    --primary: 28 100% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 240 10% 8%;
+
+    --muted: 220 14% 92%;
+    --muted-foreground: 240 5% 46%;
+
+    --accent: 172 100% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 28 100% 53%;
+  }
 }
 
 @layer base {
@@ -101,6 +130,14 @@
   @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-xl;
 }
 
+.light .glass-panel {
+  @apply border-black/5;
+}
+
 .premium-card {
   @apply bg-card border border-white/5 shadow-lg shadow-black/40;
+}
+
+.light .premium-card {
+  @apply border-black/5 shadow-black/10;
 }

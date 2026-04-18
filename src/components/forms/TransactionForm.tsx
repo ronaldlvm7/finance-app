@@ -16,6 +16,8 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
     const { addTransaction, addCategory, data } = useData();
     const [type, setType] = useState<TransactionType>(initialValues?.type || 'expense');
     const [amount, setAmount] = useState(initialValues?.amount?.toString() || '');
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [showNewCategory, setShowNewCategory] = useState(false);
     const [concept, setConcept] = useState(initialValues?.concept || '');
     const [date, setDate] = useState(initialValues?.date || format(new Date(), 'yyyy-MM-dd'));
 
@@ -106,22 +108,48 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             {/* Type Selector */}
-            <div className="grid grid-cols-4 gap-1 p-1 bg-secondary rounded-lg mb-4">
+            <div className="grid grid-cols-4 gap-1 p-1 bg-secondary rounded-xl mb-4">
                 {(['income', 'expense', 'transfer', 'debt_payment'] as const).map(t => (
                     <button
                         key={t}
                         type="button"
                         onClick={() => setType(t)}
-                        className={`text-xs py-2 rounded-md transition-all ${type === t ? 'bg-background shadow font-bold' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`text-xs py-2.5 rounded-lg transition-all font-medium ${
+                            type === t
+                                ? 'text-white shadow-md'
+                                : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        style={type === t ? {
+                            background: t === 'income' ? 'linear-gradient(135deg,#34d399,#059669)'
+                                : t === 'expense' ? 'linear-gradient(135deg,#f87171,#dc2626)'
+                                : t === 'transfer' ? 'linear-gradient(135deg,#60a5fa,#2563eb)'
+                                : 'linear-gradient(135deg,#FF9F43,#e67e22)',
+                            boxShadow: t === 'income' ? '0 4px 12px rgba(52,211,153,0.35)'
+                                : t === 'expense' ? '0 4px 12px rgba(248,113,113,0.35)'
+                                : t === 'transfer' ? '0 4px 12px rgba(96,165,250,0.35)'
+                                : '0 4px 12px rgba(255,159,67,0.35)',
+                        } : undefined}
                     >
-                        {t === 'income' ? 'Ingreso' : t === 'expense' ? 'Gasto' : t === 'transfer' ? 'Transf.' : 'Pago Deuda'}
+                        {t === 'income' ? 'Ingreso' : t === 'expense' ? 'Gasto' : t === 'transfer' ? 'Transf.' : 'Deuda'}
                     </button>
                 ))}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <Input label="Fecha" type="date" value={date} onChange={e => setDate(e.target.value)} required />
-                <Input label="Monto" type="number" value={amount} onChange={e => setAmount(e.target.value)} required placeholder="0.00" />
+                <Input
+                    label="Monto"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*\.?[0-9]*"
+                    value={amount}
+                    onChange={e => {
+                        const val = e.target.value;
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) setAmount(val);
+                    }}
+                    required
+                    placeholder="0.00"
+                />
             </div>
 
             <Input label="Concepto / Descripción" value={concept} onChange={e => setConcept(e.target.value)} required placeholder="Ej. Almuerzo, Uber..." />
@@ -130,50 +158,73 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
 
             {/* CATEGORY: Only for Income and Expense */}
             {(type === 'income' || type === 'expense') && (
-                <div className="space-y-1">
+                <div className="space-y-2">
                     <Select
                         label="Categoría"
                         value={categoryId}
-                        onChange={e => {
-                            if (e.target.value === 'NEW_CATEGORY') {
-                                // Trigger logic to add new category
-                                // Since we are in a modal, maybe we replace the current form with a small 'Add Category' input or route to categories?
-                                // Let's try a simple prompt for now, or use a nested state.
-                                const name = prompt("Nombre de la nueva categoría:");
-                                if (name) {
-                                    // We need to access addCategory from useData, but verify if it's destructured
-                                    // It is not. need to update useData call
-                                    // Since I can't easily change the destructuring without reading the file again (risk of changing too much),
-                                    // I will stick to just showing the button to GO to categories page or handle it via a new prop/function if I edit the file.
-                                    // Wait, let's fix the destructuring first.
-                                }
-                            } else {
-                                setCategoryId(e.target.value);
-                            }
-                        }}
+                        onChange={e => setCategoryId(e.target.value)}
                         options={[
                             { value: '', label: 'Seleccionar...' },
                             ...categories.map(c => ({ value: c.id, label: c.name })),
                         ]}
                         required
                     />
-                    <button
-                        type="button"
-                        onClick={async () => {
-                            const name = prompt("Nombre de la nueva categoría:");
-                            if (name && name.trim()) {
-                                await addCategory({
-                                    name: name.trim(),
-                                    isFixed: false,
-                                    icon: 'tag',
-                                    color: '#ffffff'
-                                });
-                            }
-                        }}
-                        className="text-xs text-primary font-bold hover:underline"
-                    >
-                        + Crear nueva categoría rápida
-                    </button>
+
+                    {showNewCategory ? (
+                        <div className="flex gap-2 items-center">
+                            <input
+                                autoFocus
+                                type="text"
+                                inputMode="text"
+                                value={newCategoryName}
+                                onChange={e => setNewCategoryName(e.target.value)}
+                                placeholder="Nombre de categoría..."
+                                className="flex-1 h-10 rounded-xl border border-input bg-transparent px-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                onKeyDown={async e => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        if (!newCategoryName.trim()) return;
+                                        const created = await addCategory({ name: newCategoryName.trim(), isFixed: false, icon: 'tag', color: '#ffffff' });
+                                        if (created?.id) setCategoryId(created.id);
+                                        setNewCategoryName('');
+                                        setShowNewCategory(false);
+                                    }
+                                    if (e.key === 'Escape') {
+                                        setNewCategoryName('');
+                                        setShowNewCategory(false);
+                                    }
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    if (!newCategoryName.trim()) return;
+                                    const created = await addCategory({ name: newCategoryName.trim(), isFixed: false, icon: 'tag', color: '#ffffff' });
+                                    if (created?.id) setCategoryId(created.id);
+                                    setNewCategoryName('');
+                                    setShowNewCategory(false);
+                                }}
+                                className="h-10 px-3 rounded-xl bg-primary text-primary-foreground text-sm font-semibold shrink-0"
+                            >
+                                Crear
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => { setNewCategoryName(''); setShowNewCategory(false); }}
+                                className="h-10 px-3 rounded-xl border border-input text-sm text-muted-foreground shrink-0"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setShowNewCategory(true)}
+                            className="text-xs text-primary font-bold hover:underline"
+                        >
+                            + Crear nueva categoría rápida
+                        </button>
+                    )}
                 </div>
             )}
 

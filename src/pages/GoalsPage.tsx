@@ -144,8 +144,8 @@ export const GoalsPage = () => {
                         </div>
                     </div>
                     <Input label="Nombre de la Meta" placeholder="Ej. Viaje, Auto, Laptop..." value={name} onChange={e => setName(e.target.value)} />
-                    <Input label="Monto Objetivo" type="number" placeholder="0.00" value={target} onChange={e => setTarget(e.target.value)} />
-                    <Input label="Ahorro Inicial (Opcional)" type="number" placeholder="0.00" value={current} onChange={e => setCurrent(e.target.value)} />
+                    <Input label="Monto Objetivo" type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" placeholder="0.00" value={target} onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setTarget(v); }} />
+                    <Input label="Ahorro Inicial (Opcional)" type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" placeholder="0.00" value={current} onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setCurrent(v); }} />
                     <Input label="Fecha Límite (Opcional)" type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
                     <Button className="w-full py-5 mt-2" onClick={handleAddGoal}>Crear Meta</Button>
                 </div>

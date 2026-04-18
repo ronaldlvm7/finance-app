@@ -7,12 +7,19 @@ import { LineChart, Line, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } f
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from 'lucide-react';
 
+// Returns today's date as a plain Date in Lima (UTC-5, no DST)
+const todayInLima = (): Date => {
+    const limaStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(new Date());
+    return new Date(limaStr + 'T00:00:00');
+};
+
 export const WeeklyBalanceChart = () => {
     const { data } = useData();
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(todayInLima);
 
-    const start = startOfWeek(currentDate, { weekStartsOn: 0 }); // Sunday start
-    const end = endOfWeek(currentDate, { weekStartsOn: 0 });
+    const WEEK_OPTIONS = { weekStartsOn: 1 as const }; // Monday start, Peru standard
+    const start = startOfWeek(currentDate, WEEK_OPTIONS);
+    const end = endOfWeek(currentDate, WEEK_OPTIONS);
 
     const days = eachDayOfInterval({ start, end });
 
@@ -91,8 +98,18 @@ export const WeeklyBalanceChart = () => {
                             <ChevronLeft size={20} />
                         </button>
                         <div className="text-center">
-                            <p className="text-xs text-muted-foreground mb-1">Balance de esta semana</p>
-                            <h3 className="text-2xl font-bold text-white">{formatCurrency(weeklyBalance)}</h3>
+                            <p className="text-xs text-muted-foreground mb-0.5">
+                                {format(start, "d", { locale: es })}
+                                {format(start, 'MMM', { locale: es }) !== format(end, 'MMM', { locale: es })
+                                    ? ' ' + format(start, 'MMM', { locale: es })
+                                    : ''
+                                }
+                                {' – '}
+                                {format(end, "d MMM yyyy", { locale: es })}
+                            </p>
+                            <h3 className={`text-2xl font-bold ${weeklyBalance >= 0 ? 'text-white' : 'text-red-400'}`}>
+                                {weeklyBalance >= 0 ? '' : '-'}{formatCurrency(Math.abs(weeklyBalance))}
+                            </h3>
                         </div>
                         <button onClick={() => setCurrentDate(addWeeks(currentDate, 1))} className="p-1 hover:bg-white/5 rounded-full text-muted-foreground">
                             <ChevronRight size={20} />

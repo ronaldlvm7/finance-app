@@ -34,7 +34,10 @@ export const IncomeExpenseSummary = () => {
 
             <div className="grid grid-cols-2 gap-3">
                 {/* Ingresos */}
-                <div className="bg-card rounded-2xl p-4 border border-white/5 shadow-lg shadow-black/10 flex items-center gap-3">
+                <div
+                    className="bg-card rounded-2xl p-4 border border-emerald-500/20 flex items-center gap-3"
+                    style={{ boxShadow: '0 0 20px rgba(52,211,153,0.06)' }}
+                >
                     <div className="h-10 w-10 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 shrink-0">
                         <ArrowDownLeft size={20} strokeWidth={2.5} />
                     </div>
@@ -45,7 +48,10 @@ export const IncomeExpenseSummary = () => {
                 </div>
 
                 {/* Gastos */}
-                <div className="bg-card rounded-2xl p-4 border border-white/5 shadow-lg shadow-black/10 flex items-center gap-3">
+                <div
+                    className="bg-card rounded-2xl p-4 border border-red-500/20 flex items-center gap-3"
+                    style={{ boxShadow: '0 0 20px rgba(248,113,113,0.06)' }}
+                >
                     <div className="h-10 w-10 rounded-xl bg-red-500/15 flex items-center justify-center text-red-400 shrink-0">
                         <ArrowUpRight size={20} strokeWidth={2.5} />
                     </div>

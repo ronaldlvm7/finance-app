@@ -6,12 +6,21 @@ import { es } from 'date-fns/locale';
 import { useState } from 'react';
 
 const GRADIENTS: Record<string, string> = {
-    total: 'from-[#1a1f3c] via-[#1e2347] to-[#252b55]',
-    cash: 'from-emerald-950 via-emerald-900/80 to-emerald-950',
-    bank: 'from-blue-950 via-blue-900/80 to-blue-950',
-    savings: 'from-sky-950 via-sky-900/80 to-sky-950',
-    credit_card: 'from-purple-950 via-purple-900/80 to-purple-950',
-    default: 'from-gray-900 via-gray-800 to-gray-900',
+    total: 'from-[#FF9F43] via-[#e67e22] to-[#c0392b]',
+    cash: 'from-emerald-700 via-emerald-800 to-emerald-950',
+    bank: 'from-blue-700 via-blue-800 to-blue-950',
+    savings: 'from-sky-600 via-sky-800 to-sky-950',
+    credit_card: 'from-purple-700 via-purple-800 to-purple-950',
+    default: 'from-gray-700 via-gray-800 to-gray-900',
+};
+
+const SHADOWS: Record<string, string> = {
+    total: '0 20px 60px rgba(255,159,67,0.35), 0 4px 20px rgba(255,159,67,0.2)',
+    cash: '0 20px 60px rgba(52,211,153,0.25), 0 4px 20px rgba(52,211,153,0.15)',
+    bank: '0 20px 60px rgba(96,165,250,0.25), 0 4px 20px rgba(96,165,250,0.15)',
+    savings: '0 20px 60px rgba(56,189,248,0.25), 0 4px 20px rgba(56,189,248,0.15)',
+    credit_card: '0 20px 60px rgba(167,139,250,0.25), 0 4px 20px rgba(167,139,250,0.15)',
+    default: '0 20px 60px rgba(0,0,0,0.4)',
 };
 
 const ACCENT_COLORS: Record<string, string> = {
@@ -61,7 +70,8 @@ export const BalanceWidget = () => {
     const currentItem = items[currentIndex];
     const gradient = GRADIENTS[currentItem.type] ?? GRADIENTS.default;
     const accentColor = ACCENT_COLORS[currentItem.type] ?? ACCENT_COLORS.default;
-    const amountColor = AMOUNT_COLORS[currentItem.type] ?? AMOUNT_COLORS.default;
+    const amountColor = currentItem.type === 'total' ? 'text-white' : (AMOUNT_COLORS[currentItem.type] ?? AMOUNT_COLORS.default);
+    const cardShadow = SHADOWS[currentItem.type] ?? SHADOWS.default;
 
     const nextItem = () => setCurrentIndex(prev => (prev + 1) % items.length);
     const prevItem = () => setCurrentIndex(prev => (prev - 1 + items.length) % items.length);
@@ -82,7 +92,10 @@ export const BalanceWidget = () => {
     const itemCount = String(currentIndex + 1).padStart(1, '0') + '/' + items.length;
 
     return (
-        <div className={`relative overflow-hidden bg-gradient-to-br ${gradient} border border-white/10 shadow-2xl shadow-black/40 rounded-3xl h-56 flex flex-col justify-between p-6 transition-all duration-500`}>
+        <div
+            className={`relative overflow-hidden bg-gradient-to-br ${gradient} border border-white/10 rounded-3xl h-56 flex flex-col justify-between p-6 transition-all duration-500`}
+            style={{ boxShadow: cardShadow }}
+        >
             {/* Accent left stripe */}
             <div className={`absolute top-0 left-0 w-1 h-full ${accentColor} opacity-80`} />
 

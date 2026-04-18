@@ -25,7 +25,7 @@ interface DataContextType {
     deleteAccount: (id: string) => Promise<void>;
     addDebt: (debt: Omit<Debt, 'id'>) => Promise<void>;
     updateDebt: (debt: Debt) => Promise<void>;
-    addCategory: (category: Omit<Category, 'id'>) => Promise<void>;
+    addCategory: (category: Omit<Category, 'id'>) => Promise<Category | undefined>;
     updateCategory: (category: Category) => Promise<void>;
     deleteCategory: (id: string) => Promise<void>;
     setBudget: (budget: Budget) => Promise<void>;
@@ -368,16 +368,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // ------------------------------------------------------------------
     // GOALS & CATEGORIES
     // ------------------------------------------------------------------
-    const addCategory = async (cat: Omit<Category, 'id'>) => {
+    const addCategory = async (cat: Omit<Category, 'id'>): Promise<Category | undefined> => {
         if (!authUser) return;
-        await supabase.from('categories').insert({
+        const { data: inserted } = await supabase.from('categories').insert({
             user_id: authUser.id,
             name: cat.name,
             is_fixed: cat.isFixed,
             icon: cat.icon,
             color: cat.color
-        });
+        }).select().single();
         fetchData();
+        if (!inserted) return undefined;
+        return { id: inserted.id, name: inserted.name, isFixed: inserted.is_fixed, icon: inserted.icon, color: inserted.color };
     };
 
     const updateCategory = async (cat: Category) => {

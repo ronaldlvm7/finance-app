@@ -22,7 +22,7 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
             <DrawerMenu isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
 
             {/* Mobile Header — pt-safe respects iPhone notch/Dynamic Island */}
-            <header className="md:hidden fixed top-0 left-0 right-0 bg-card/80 backdrop-blur-md flex items-center justify-between px-4 z-30 border-b border-white/5 pt-safe"
+            <header className="md:hidden fixed top-0 left-0 right-0 bg-card/80 backdrop-blur-md flex items-center justify-between px-4 z-30 border-b border-border pt-safe"
                 style={{ paddingTop: `max(env(safe-area-inset-top, 0px), 0px)`, height: 'calc(4rem + env(safe-area-inset-top, 0px))' }}
             >
                 <button onClick={() => setIsDrawerOpen(true)} className="p-2 -ml-2 text-muted-foreground hover:text-white">
@@ -56,7 +56,7 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
 
             {/* Bottom Navigation — positioned above iPhone home indicator */}
             <nav
-                className="md:hidden fixed left-4 right-4 h-16 bg-card/90 backdrop-blur-xl border border-white/10 rounded-2xl z-40 flex items-center justify-between px-4 shadow-2xl shadow-black/50"
+                className="md:hidden fixed left-4 right-4 h-16 bg-card/90 backdrop-blur-xl border border-border rounded-2xl z-40 flex items-center justify-between px-4 shadow-2xl shadow-black/20"
                 style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
             >
                 <NavItem to="/" icon={<Home size={22} />} label="Home" />

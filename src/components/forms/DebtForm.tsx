@@ -72,11 +72,11 @@ export const DebtForm = ({ onSuccess, onCancel }: DebtFormProps) => {
             )}
 
             <div className="grid grid-cols-2 gap-4">
-                <Input label="Monto total" type="number" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} required />
-                <Input label="Saldo actual" type="number" value={currentBalance} onChange={e => setCurrentBalance(e.target.value)} placeholder="Igual al total si es nuevo" />
+                <Input label="Monto total" type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={totalAmount} onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setTotalAmount(v); }} required />
+                <Input label="Saldo actual" type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={currentBalance} onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setCurrentBalance(v); }} placeholder="Igual al total si es nuevo" />
             </div>
 
-            <Input label="Día de pago (1-31)" type="number" min="1" max="31" value={dueDate} onChange={e => setDueDate(e.target.value)} placeholder="Ej. 5" />
+            <Input label="Día de pago (1-31)" type="text" inputMode="numeric" pattern="[0-9]*" value={dueDate} onChange={e => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) setDueDate(v); }} placeholder="Ej. 5" />
 
             <div className="flex gap-3 pt-4">
                 <Button type="button" variant="ghost" className="flex-1" onClick={onCancel}>Cancelar</Button>
