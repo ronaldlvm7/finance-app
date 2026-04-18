@@ -135,21 +135,25 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
                 ))}
             </div>
 
-            <div className="grid gap-4" style={{gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)'}}>
-                <Input label="Fecha" type="date" value={date} onChange={e => setDate(e.target.value)} required />
-                <Input
-                    label="Monto"
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9]*\.?[0-9]*"
-                    value={amount}
-                    onChange={e => {
-                        const val = e.target.value;
-                        if (val === '' || /^\d*\.?\d*$/.test(val)) setAmount(val);
-                    }}
-                    required
-                    placeholder="0.00"
-                />
+            <div className="flex gap-4">
+                <div className="flex-1 overflow-hidden min-w-0">
+                    <Input label="Fecha" type="date" value={date} onChange={e => setDate(e.target.value)} required />
+                </div>
+                <div className="flex-1 overflow-hidden min-w-0">
+                    <Input
+                        label="Monto"
+                        type="text"
+                        inputMode="decimal"
+                        pattern="[0-9]*\.?[0-9]*"
+                        value={amount}
+                        onChange={e => {
+                            const val = e.target.value;
+                            if (val === '' || /^\d*\.?\d*$/.test(val)) setAmount(val);
+                        }}
+                        required
+                        placeholder="0.00"
+                    />
+                </div>
             </div>
 
             <Input label="Concepto / Descripción" value={concept} onChange={e => setConcept(e.target.value)} required placeholder="Ej. Almuerzo, Uber..." />
