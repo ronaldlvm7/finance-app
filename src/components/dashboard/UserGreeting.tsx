@@ -13,8 +13,8 @@ export const UserGreeting = () => {
                     </div>
                 </div>
                 <div>
-                    <p className="text-xs text-muted-foreground font-medium">Bienvenido de nuevo,</p>
-                    <h2 className="text-lg font-bold leading-none">{user.name}</h2>
+                    <p className="ios-subhead">Bienvenido de nuevo,</p>
+                    <h2 className="ios-title-1 leading-tight">{user.name}</h2>
                 </div>
             </div>
             <button className="h-10 w-10 rounded-full bg-card border border-white/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors relative">

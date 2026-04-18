@@ -86,8 +86,8 @@ export const TransactionsPage = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Movimientos</h1>
-                    <p className="text-muted-foreground text-sm capitalize">{monthLabel}</p>
+                    <h1 className="ios-large-title">Movimientos</h1>
+                    <p className="ios-subhead capitalize">{monthLabel}</p>
                 </div>
                 <button
                     onClick={() => setShowSearch(s => !s)}

@@ -141,3 +141,36 @@
 .light .premium-card {
   @apply border-black/5 shadow-black/10;
 }
+
+/* iOS Typography Scale */
+.ios-large-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+}
+.ios-title-1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.ios-headline {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+}
+.ios-body {
+  font-size: 15px;
+  font-weight: 400;
+}
+.ios-subhead {
+  font-size: 13px;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+.ios-caption {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+  color: hsl(var(--muted-foreground));
+}

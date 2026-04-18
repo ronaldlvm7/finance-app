@@ -25,8 +25,8 @@ export const SettingsPage = () => {
                     <Settings size={24} />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Configuración</h1>
-                    <p className="text-muted-foreground text-sm">Gestiona tus preferencias y datos.</p>
+                    <h1 className="ios-large-title">Configuración</h1>
+                    <p className="ios-subhead">Gestiona tus preferencias y datos.</p>
                 </div>
             </div>
 

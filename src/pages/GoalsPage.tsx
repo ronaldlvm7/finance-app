@@ -40,8 +40,8 @@ export const GoalsPage = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Mis Metas</h1>
-                    <p className="text-muted-foreground text-sm">Ahorra para tus sueños.</p>
+                    <h1 className="ios-large-title">Mis Metas</h1>
+                    <p className="ios-subhead">Ahorra para tus sueños.</p>
                 </div>
                 <button
                     onClick={() => setIsAddOpen(true)}
@@ -154,6 +154,44 @@ export const GoalsPage = () => {
     );
 };
 
+// Deterministic color per goal based on name hash
+const RING_COLORS = [
+    { stroke: '#FF9F43', bg: 'rgba(255,159,67,0.10)', border: 'rgba(255,159,67,0.20)' },
+    { stroke: '#a29bfe', bg: 'rgba(162,155,254,0.10)', border: 'rgba(162,155,254,0.20)' },
+    { stroke: '#00D9C0', bg: 'rgba(0,217,192,0.10)', border: 'rgba(0,217,192,0.20)' },
+    { stroke: '#fd79a8', bg: 'rgba(253,121,168,0.10)', border: 'rgba(253,121,168,0.20)' },
+    { stroke: '#74b9ff', bg: 'rgba(116,185,255,0.10)', border: 'rgba(116,185,255,0.20)' },
+    { stroke: '#55efc4', bg: 'rgba(85,239,196,0.10)', border: 'rgba(85,239,196,0.20)' },
+];
+
+const goalColor = (id: string) => {
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+    return RING_COLORS[h % RING_COLORS.length];
+};
+
+interface ActivityRingProps { progress: number; stroke: string; size?: number; strokeWidth?: number; }
+
+const ActivityRing = ({ progress, stroke, size = 64, strokeWidth = 5.5 }: ActivityRingProps) => {
+    const r = (size - strokeWidth) / 2;
+    const circ = 2 * Math.PI * r;
+    const offset = circ - Math.min(progress / 100, 1) * circ;
+    const cx = size / 2;
+    return (
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0 -rotate-90">
+            <circle cx={cx} cy={cx} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={strokeWidth} />
+            <circle
+                cx={cx} cy={cx} r={r} fill="none"
+                stroke={stroke} strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                strokeDasharray={circ}
+                strokeDashoffset={offset}
+                style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1)' }}
+            />
+        </svg>
+    );
+};
+
 interface GoalCardProps {
     goal: Goal;
     progress: number;
@@ -162,53 +200,66 @@ interface GoalCardProps {
     onDelete: () => void;
 }
 
-const GoalCard = ({ goal, progress, isComplete, remaining, onDelete }: GoalCardProps) => (
-    <div className={`bg-card rounded-2xl p-5 border ${isComplete ? 'border-emerald-500/30' : 'border-white/5'} relative overflow-hidden`}>
-        {isComplete && (
-            <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">
-                ✓ Lograda
-            </div>
-        )}
+const GoalCard = ({ goal, progress, isComplete, remaining, onDelete }: GoalCardProps) => {
+    const color = isComplete
+        ? { stroke: '#34d399', bg: 'rgba(52,211,153,0.07)', border: 'rgba(52,211,153,0.25)' }
+        : goalColor(goal.id);
 
-        <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center gap-3">
-                <div className={`h-12 w-12 rounded-2xl flex items-center justify-center text-2xl ${isComplete ? 'bg-emerald-500/15' : 'bg-white/5'}`}>
-                    {goal.icon || '🎯'}
+    return (
+        <div
+            className="rounded-2xl p-4 relative"
+            style={{ background: color.bg, border: `1px solid ${color.border}` }}
+        >
+            <div className="flex items-center gap-4">
+                {/* Activity Ring with emoji */}
+                <div className="relative shrink-0">
+                    <ActivityRing progress={progress} stroke={color.stroke} />
+                    <span className="absolute inset-0 flex items-center justify-center text-[22px] rotate-90">
+                        {goal.icon || '🎯'}
+                    </span>
                 </div>
-                <div>
-                    <h3 className="font-bold">{goal.name}</h3>
-                    <p className="text-xs text-muted-foreground">
-                        Objetivo: {formatCurrency(goal.targetAmount)}
+
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                        <h3 className="ios-headline truncate pr-2">{goal.name}</h3>
+                        {isComplete ? (
+                            <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full text-emerald-400" style={{ background: 'rgba(52,211,153,0.15)' }}>
+                                ✓ Lograda
+                            </span>
+                        ) : (
+                            <span className="shrink-0 ios-headline font-bold" style={{ color: color.stroke }}>
+                                {Math.round(progress)}%
+                            </span>
+                        )}
+                    </div>
+
+                    <p className="ios-caption mb-2">
+                        {formatCurrency(goal.currentAmount)} de {formatCurrency(goal.targetAmount)}
                         {goal.deadline ? ` · ${new Date(goal.deadline).toLocaleDateString('es-PE', { month: 'short', year: 'numeric' })}` : ''}
                     </p>
+
+                    {/* Mini progress bar */}
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                        <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{ width: `${progress}%`, background: color.stroke }}
+                        />
+                    </div>
+
+                    {!isComplete && (
+                        <p className="ios-caption mt-1.5">Falta {formatCurrency(remaining)}</p>
+                    )}
                 </div>
-            </div>
-            <button
-                onClick={onDelete}
-                className="p-1.5 text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-            >
-                <Trash2 size={15} />
-            </button>
-        </div>
 
-        <div className="h-2.5 bg-white/5 rounded-full overflow-hidden mb-3">
-            <div
-                className={`h-full rounded-full transition-all duration-700 ${isComplete ? 'bg-emerald-500' : 'bg-gradient-to-r from-primary to-accent'}`}
-                style={{ width: `${progress}%` }}
-            />
-        </div>
-
-        <div className="flex justify-between items-center">
-            <div>
-                <p className={`text-base font-bold ${isComplete ? 'text-emerald-400' : 'text-foreground'}`}>
-                    {formatCurrency(goal.currentAmount)}
-                </p>
-                <p className="text-[10px] text-muted-foreground">ahorrado</p>
-            </div>
-            <div className="text-right">
-                <p className="text-base font-bold text-muted-foreground">{Math.round(progress)}%</p>
-                {!isComplete && <p className="text-[10px] text-muted-foreground">Falta {formatCurrency(remaining)}</p>}
+                {/* Delete */}
+                <button
+                    onClick={onDelete}
+                    className="shrink-0 p-1.5 text-muted-foreground/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all self-start"
+                >
+                    <Trash2 size={14} />
+                </button>
             </div>
         </div>
-    </div>
-);
+    );
+};
