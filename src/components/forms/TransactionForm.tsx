@@ -135,7 +135,7 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
                 ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4" style={{gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)'}}>
                 <Input label="Fecha" type="date" value={date} onChange={e => setDate(e.target.value)} required />
                 <Input
                     label="Monto"
