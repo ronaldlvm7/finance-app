@@ -136,10 +136,25 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
             </div>
 
             <div className="flex gap-4">
-                <div className="flex-1 overflow-hidden min-w-0">
-                    <Input label="Fecha" type="date" value={date} onChange={e => setDate(e.target.value)} required />
+                {/* Custom date field: visual div + hidden native input overlay (fixes iOS min-width) */}
+                <div className="flex-1 min-w-0 space-y-2">
+                    <label className="text-sm font-medium leading-none text-muted-foreground">Fecha</label>
+                    <div className="relative h-12 w-full">
+                        <div className="flex h-12 w-full items-center rounded-xl border border-input bg-transparent px-3 text-base pointer-events-none select-none">
+                            <span className="truncate">
+                                {date ? (() => { const [y,m,d] = date.split('-'); return `${d}/${m}/${y}`; })() : ''}
+                            </span>
+                        </div>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={e => setDate(e.target.value)}
+                            required
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                    </div>
                 </div>
-                <div className="flex-1 overflow-hidden min-w-0">
+                <div className="flex-1 min-w-0">
                     <Input
                         label="Monto"
                         type="text"
