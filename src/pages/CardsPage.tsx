@@ -99,7 +99,7 @@ export const CardsPage = () => {
             <Modal isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} title="Nueva Tarjeta">
                 <div className="space-y-4">
                     <Input label="Nombre de la Tarjeta" placeholder="Ej. VISA Signature" value={cardName} onChange={e => setCardName(e.target.value)} />
-                    <Input label="Límite de Crédito" type="number" placeholder="0.00" value={limit} onChange={e => setLimit(e.target.value)} />
+                    <Input label="Límite de Crédito" type="text" inputMode="decimal" placeholder="0.00" value={limit} onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setLimit(v); }} />
                     <Button className="w-full mt-4" onClick={handleAddCard}>Guardar Tarjeta</Button>
                 </div>
             </Modal>

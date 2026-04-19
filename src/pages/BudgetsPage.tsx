@@ -96,7 +96,7 @@ export const BudgetsPage = () => {
                             ...categories.map(c => ({ value: c.id, label: c.name }))
                         ]}
                     />
-                    <Input label="Monto Límite" type="number" value={amount} onChange={e => setAmount(e.target.value)} />
+                    <Input label="Monto Límite" type="text" inputMode="decimal" placeholder="0.00" value={amount} onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setAmount(v); }} />
                     <Button className="w-full" onClick={handleSave}>Guardar</Button>
                 </div>
             </Modal>

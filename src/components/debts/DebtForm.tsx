@@ -95,21 +95,31 @@ export const DebtForm: React.FC<DebtFormProps> = ({ onSuccess, onCancel, initial
             <div className="grid grid-cols-2 gap-4">
                 <Input
                     label={isSubscription ? "Costo Mensual" : "Monto Total"}
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     placeholder="0.00"
                     value={totalAmount}
-                    onChange={(e) => setTotalAmount(e.target.value)}
+                    onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setTotalAmount(v); }}
                     required
                 />
 
-                <Input
-                    label="Fecha Inicio"
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                />
+                <div className="space-y-2">
+                    <label className="text-sm font-medium leading-none text-muted-foreground">Fecha Inicio</label>
+                    <div className="relative h-12 w-full">
+                        <div className="flex h-12 w-full items-center rounded-xl border border-input bg-transparent px-3 text-base pointer-events-none select-none">
+                            <span className="truncate text-sm">
+                                {startDate ? (() => { const [y, m, d] = startDate.split('-'); return `${d}/${m}/${y}`; })() : ''}
+                            </span>
+                        </div>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            required
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                    </div>
+                </div>
             </div>
 
             {!isSubscription && (
@@ -126,11 +136,11 @@ export const DebtForm: React.FC<DebtFormProps> = ({ onSuccess, onCancel, initial
                     />
                     <Input
                         label="Cuotas"
-                        type="number"
-                        min="1"
+                        type="text"
+                        inputMode="numeric"
                         placeholder="12"
                         value={installments}
-                        onChange={(e) => setInstallments(e.target.value)}
+                        onChange={(e) => { const v = e.target.value; if (v === '' || /^\d+$/.test(v)) setInstallments(v); }}
                         required={!isSubscription}
                     />
                 </div>

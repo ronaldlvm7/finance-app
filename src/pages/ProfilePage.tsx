@@ -201,7 +201,7 @@ const AccountsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                             { value: 'savings', label: 'Ahorros 🐖' }
                         ]}
                     />
-                    <Input label="Saldo Inicial" type="number" placeholder="0.00" value={amount} onChange={e => setAmount(e.target.value)} />
+                    <Input label="Saldo Inicial" type="text" inputMode="decimal" placeholder="0.00" value={amount} onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) setAmount(v); }} />
 
                     <div className="flex gap-3 pt-2">
                         <Button variant="outline" className="flex-1" onClick={() => setIsAddMode(false)}>Cancelar</Button>

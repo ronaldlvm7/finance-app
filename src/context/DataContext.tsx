@@ -111,7 +111,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 totalAmount: Number(item.total_amount),
                 currentBalance: Number(item.current_balance),
                 status: item.status,
-                startDate: item.start_date,
+                startDate: item.start_date ? String(item.start_date).substring(0, 10) : undefined,
                 dueDate: item.due_date,
                 installments: item.installments,
                 installmentsPaid: item.installments_paid,

@@ -9,6 +9,49 @@ import { TransactionForm } from '../components/forms/TransactionForm';
 import { cn, formatCurrency } from '../utils/utils';
 import type { Debt } from '../types';
 
+// Returns the Date when `debt` occurs within the given month/year, or null.
+// Handles: subscriptions (infinite), installments (limited), and edge cases.
+const getDebtOccurrenceInMonth = (debt: Debt, year: number, month: number): Date | null => {
+    // Resolve the pay day: prefer startDate's day over dueDate
+    let payDay: number | null = null;
+    let startYear: number | null = null;
+    let startMonth: number | null = null;
+
+    if (debt.startDate) {
+        const s = debt.startDate.substring(0, 10);
+        const [sy, sm, sd] = s.split('-').map(Number);
+        if (sy && sm && sd) {
+            startYear = sy;
+            startMonth = sm - 1; // JS month 0-indexed
+            payDay = sd;
+        }
+    }
+
+    if (payDay === null && debt.dueDate) {
+        payDay = debt.dueDate;
+    }
+
+    if (payDay === null) return null;
+
+    // Clamp to last day of target month (e.g. Feb 31 → Feb 28)
+    const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+    const day = Math.min(payDay, lastDayOfMonth);
+    const candidate = new Date(year, month, day);
+
+    // If we have a startDate, the target month must be >= start month
+    if (startYear !== null && startMonth !== null) {
+        const monthsSinceStart = (year - startYear) * 12 + (month - startMonth);
+        if (monthsSinceStart < 0) return null; // before start
+
+        // For non-subscription debts with installments, enforce limit
+        if (debt.type !== 'subscription' && debt.installments) {
+            if (monthsSinceStart >= debt.installments) return null;
+        }
+    }
+
+    return candidate;
+};
+
 export const CalendarPage = () => {
     const { data } = useData();
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -32,39 +75,16 @@ export const CalendarPage = () => {
         isSameMonth(parseISO(t.date), currentDate)
     );
 
-    // Active debts that have a due date
-    const activeDebts = data.debts.filter(d => d.status === 'active' && d.dueDate);
+    // Active debts (any debt with startDate or dueDate is eligible)
+    const activeDebts = data.debts.filter(d => d.status === 'active' && (d.dueDate || d.startDate));
 
     // Helpers
     const getEventsForDay = (day: Date) => {
         const dayTransactions = monthTransactions.filter(t => isSameDay(parseISO(t.date), day));
 
         const dayDebts = activeDebts.filter(debt => {
-            // 1. Verificar que el día del mes coincida
-            if (debt.dueDate !== day.getDate()) return false;
-
-            // 2. Verificar que sea después o igual a la fecha de inicio
-            if (debt.startDate) {
-                const startDate = parseISO(debt.startDate);
-                // Si el día del calendario es antes de la fecha de inicio, no mostrar
-                if (day < startDate) return false;
-            }
-
-            // 3. Para deudas con cuotas (no suscripciones), verificar límite
-            if (debt.type !== 'subscription' && debt.installments && debt.startDate) {
-                const startDate = parseISO(debt.startDate);
-
-                // Calcular cuántos meses han pasado desde la fecha de inicio
-                const yearsDiff = day.getFullYear() - startDate.getFullYear();
-                const monthsDiff = day.getMonth() - startDate.getMonth();
-                const totalMonthsPassed = yearsDiff * 12 + monthsDiff;
-
-                // Si han pasado más meses que cuotas, no mostrar
-                // (totalMonthsPassed = 0 significa el primer mes, 1 el segundo, etc.)
-                if (totalMonthsPassed >= debt.installments) return false;
-            }
-
-            return true;
+            const occurrence = getDebtOccurrenceInMonth(debt, day.getFullYear(), day.getMonth());
+            return occurrence !== null && isSameDay(occurrence, day);
         });
 
         return { transactions: dayTransactions, debts: dayDebts };
@@ -337,22 +357,26 @@ interface UpcomingEventsProps {
 const UpcomingEvents = ({ activeDebts, currentDate, onPayDebt }: UpcomingEventsProps) => {
     const today = startOfDay(new Date());
     const isSameDisplayMonth = isSameMonth(currentDate, today);
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-    // Only show upcoming events for current month view
-    const upcoming = activeDebts
-        .filter(debt => {
-            if (!debt.dueDate) return false;
-            // Build the next occurrence date for this debt in the current month
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const day = Math.min(debt.dueDate, new Date(year, month + 1, 0).getDate());
-            const nextDate = new Date(year, month, day);
-            // Only show if in the future (today or later) when viewing current month
-            if (isSameDisplayMonth && !isAfter(nextDate, addDays(today, -1))) return false;
+    // Build list of { debt, occurrenceDate } for the current displayed month
+    const occurrences = activeDebts
+        .map(debt => {
+            const occurrenceDate = getDebtOccurrenceInMonth(debt, year, month);
+            return occurrenceDate ? { debt, occurrenceDate } : null;
+        })
+        .filter((x): x is { debt: Debt; occurrenceDate: Date } => x !== null)
+        .filter(({ occurrenceDate }) => {
+            // When viewing current calendar month, hide events that already passed
+            if (isSameDisplayMonth && !isAfter(occurrenceDate, addDays(today, -1))) return false;
             return true;
         })
-        .sort((a, b) => (a.dueDate || 0) - (b.dueDate || 0))
+        .sort((a, b) => a.occurrenceDate.getTime() - b.occurrenceDate.getTime())
         .slice(0, 5);
+
+    const upcoming = occurrences.map(o => o.debt);
+    const occurrenceMap = new Map(occurrences.map(o => [o.debt.id, o.occurrenceDate]));
 
     if (upcoming.length === 0) return null;
 
@@ -366,10 +390,7 @@ const UpcomingEvents = ({ activeDebts, currentDate, onPayDebt }: UpcomingEventsP
             </div>
             <div className="space-y-2">
                 {upcoming.map(debt => {
-                    const year = currentDate.getFullYear();
-                    const month = currentDate.getMonth();
-                    const day = Math.min(debt.dueDate!, new Date(year, month + 1, 0).getDate());
-                    const dueDate = new Date(year, month, day);
+                    const dueDate = occurrenceMap.get(debt.id)!;
                     const isOverdue = isSameDisplayMonth && !isAfter(dueDate, addDays(today, -1));
 
                     return (
@@ -387,12 +408,14 @@ const UpcomingEvents = ({ activeDebts, currentDate, onPayDebt }: UpcomingEventsP
                                     "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-sm font-bold",
                                     isOverdue ? "bg-red-500/20 text-red-400" : "bg-orange-500/15 text-orange-400"
                                 )}>
-                                    {debt.dueDate}
+                                    {dueDate.getDate()}
                                 </div>
                                 <div>
                                     <p className="font-semibold text-sm">{debt.name}</p>
                                     <p className="text-[11px] text-muted-foreground">
-                                        {debt.type === 'subscription' ? 'Suscripción' : 'Deuda'} • día {debt.dueDate} de cada mes
+                                        {debt.type === 'subscription'
+                                            ? `Suscripción • día ${dueDate.getDate()} de cada mes`
+                                            : `Deuda • ${format(dueDate, "d 'de' MMMM yyyy", { locale: es })}`}
                                     </p>
                                 </div>
                             </div>
