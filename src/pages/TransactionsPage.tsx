@@ -4,7 +4,10 @@ import { formatCurrency } from '../utils/utils';
 import { format, subMonths, addMonths, isSameMonth, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { WeeklyBalanceChart } from '../components/dashboard/WeeklyBalanceChart';
-import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, ArrowLeftRight, ChevronLeft, ChevronRight, Search, SlidersHorizontal, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import type { Transaction } from '../types';
+import { TransactionForm } from '../components/forms/TransactionForm';
+import { Modal } from '../components/ui/Modal';
 
 type FilterType = 'all' | 'income' | 'expense' | 'transfer' | 'debt_payment';
 
@@ -17,11 +20,17 @@ const TYPE_LABELS: Record<FilterType, string> = {
 };
 
 export const TransactionsPage = () => {
-    const { data } = useData();
+    const { data, deleteTransaction, updateTransaction } = useData();
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [filterType, setFilterType] = useState<FilterType>('all');
     const [search, setSearch] = useState('');
     const [showSearch, setShowSearch] = useState(false);
+
+    // Edit / Delete state
+    const [actionTxn, setActionTxn] = useState<Transaction | null>(null);
+    const [deleteTxn, setDeleteTxn] = useState<Transaction | null>(null);
+    const [editTxn, setEditTxn] = useState<Transaction | null>(null);
+    const [pendingEditData, setPendingEditData] = useState<Omit<Transaction, 'id'> | null>(null);
 
     const allSorted = [...data.transactions].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -82,6 +91,7 @@ export const TransactionsPage = () => {
     const groupedEntries = Object.entries(grouped).sort(([a], [b]) => b.localeCompare(a));
 
     return (
+        <>
         <div className="space-y-5 pb-20 fade-in">
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -195,9 +205,17 @@ export const TransactionsPage = () => {
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <p className={`font-bold text-sm shrink-0 ml-2 ${getAmountStyle(txn.type)}`}>
-                                                    {getAmountPrefix(txn.type)}{formatCurrency(txn.amount)}
-                                                </p>
+                                                <div className="flex items-center gap-1 shrink-0 ml-2">
+                                                    <p className={`font-bold text-sm ${getAmountStyle(txn.type)}`}>
+                                                        {getAmountPrefix(txn.type)}{formatCurrency(txn.amount)}
+                                                    </p>
+                                                    <button
+                                                        onClick={e => { e.stopPropagation(); setActionTxn(txn); }}
+                                                        className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground transition-colors ml-1"
+                                                    >
+                                                        <MoreVertical size={15} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         );
                                     })}
@@ -208,5 +226,123 @@ export const TransactionsPage = () => {
                 </div>
             )}
         </div>
+
+            {/* ── ACTION SHEET ── */}
+            {actionTxn && (
+                <div className="fixed inset-0 z-50 flex items-end justify-center">
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActionTxn(null)} />
+                    <div className="relative w-full max-w-lg bg-card rounded-t-3xl px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-bottom duration-200"
+                        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}>
+                        <div className="w-12 h-1.5 rounded-full bg-white/20 mx-auto mb-3" />
+                        <p className="text-center text-xs text-muted-foreground font-medium mb-1 truncate px-4">{actionTxn.concept}</p>
+                        <button
+                            onClick={() => { setEditTxn(actionTxn); setActionTxn(null); }}
+                            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors text-left"
+                        >
+                            <Pencil size={18} className="text-primary shrink-0" />
+                            <span className="font-semibold text-sm">Editar movimiento</span>
+                        </button>
+                        <button
+                            onClick={() => { setDeleteTxn(actionTxn); setActionTxn(null); }}
+                            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 transition-colors text-left"
+                        >
+                            <Trash2 size={18} className="text-red-400 shrink-0" />
+                            <span className="font-semibold text-sm text-red-400">Eliminar movimiento</span>
+                        </button>
+                        <button
+                            onClick={() => setActionTxn(null)}
+                            className="w-full py-3.5 rounded-2xl bg-white/5 text-muted-foreground font-semibold text-sm mt-1"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── DELETE CONFIRM ── */}
+            {deleteTxn && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setDeleteTxn(null)} />
+                    <div className="relative bg-card rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-white/5 animate-in zoom-in-95 duration-200">
+                        <div className="text-center mb-5">
+                            <div className="w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center mx-auto mb-4">
+                                <Trash2 size={24} className="text-red-400" />
+                            </div>
+                            <h3 className="font-bold text-lg mb-2">¿Eliminar movimiento?</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Se eliminará <span className="font-semibold text-foreground">"{deleteTxn.concept}"</span> permanentemente. Esta acción no se puede deshacer.
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setDeleteTxn(null)}
+                                className="flex-1 py-3 rounded-2xl border border-white/10 text-sm font-semibold hover:bg-white/5 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={async () => { await deleteTransaction(deleteTxn.id); setDeleteTxn(null); }}
+                                className="flex-1 py-3 rounded-2xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition-colors"
+                            >
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── EDIT MODAL ── */}
+            <Modal
+                isOpen={!!editTxn && !pendingEditData}
+                onClose={() => setEditTxn(null)}
+                title="Editar Movimiento"
+            >
+                {editTxn && (
+                    <TransactionForm
+                        initialValues={editTxn}
+                        editId={editTxn.id}
+                        onPendingEdit={data => setPendingEditData(data)}
+                        onSuccess={() => setEditTxn(null)}
+                        onCancel={() => setEditTxn(null)}
+                    />
+                )}
+            </Modal>
+
+            {/* ── EDIT CONFIRM ── */}
+            {pendingEditData && editTxn && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setPendingEditData(null)} />
+                    <div className="relative bg-card rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-white/5 animate-in zoom-in-95 duration-200">
+                        <div className="text-center mb-5">
+                            <div className="w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-4">
+                                <Pencil size={24} className="text-primary" />
+                            </div>
+                            <h3 className="font-bold text-lg mb-2">¿Confirmar cambios?</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                Se guardarán los cambios realizados en <span className="font-semibold text-foreground">"{editTxn.concept}"</span>.
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setPendingEditData(null)}
+                                className="flex-1 py-3 rounded-2xl border border-white/10 text-sm font-semibold hover:bg-white/5 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    await updateTransaction({ ...pendingEditData, id: editTxn.id });
+                                    setPendingEditData(null);
+                                    setEditTxn(null);
+                                }}
+                                className="flex-1 py-3 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold transition-colors"
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };

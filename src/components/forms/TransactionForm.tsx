@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useData } from '../../context/DataContext';
 import type { TransactionType, Transaction } from '../../types';
 import { Button } from '../ui/Button';
@@ -10,10 +10,13 @@ export interface TransactionFormProps {
     onSuccess: () => void;
     onCancel?: () => void;
     initialValues?: Partial<Transaction>;
+    editId?: string;
+    onPendingEdit?: (data: Omit<Transaction, 'id'>) => void;
 }
 
-export const TransactionForm = ({ onSuccess, onCancel, initialValues }: TransactionFormProps) => {
+export const TransactionForm = ({ onSuccess, onCancel, initialValues, editId, onPendingEdit }: TransactionFormProps) => {
     const { addTransaction, addCategory, data } = useData();
+    const isFirstMount = useRef(true);
     const [type, setType] = useState<TransactionType>(initialValues?.type || 'expense');
     const [amount, setAmount] = useState(initialValues?.amount?.toString() || '');
     const [newCategoryName, setNewCategoryName] = useState('');
@@ -32,15 +35,17 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
     const categories = data.categories;
     const activeDebts = data.debts.filter(d => d.status === 'active');
 
-    // Reset states when type changes
+    // Reset states when type changes (skip on first mount to preserve initialValues)
     React.useEffect(() => {
-        // Keep date, but reset others to avoid UI artifacts
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
         setCategoryId('');
         setFromAccountId('');
         setToAccountId('');
         setDebtId('');
         setPaymentMethod('cash');
-        // Concept and amount can persist for convenience
     }, [type]);
 
     // Auto-detect Credit Card "Payment Method"
@@ -90,7 +95,7 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
             }
         }
 
-        addTransaction({
+        const txnData: Omit<Transaction, 'id'> = {
             date,
             type,
             amount: Number(amount),
@@ -100,8 +105,15 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
             toAccountId: (type === 'expense' || type === 'debt_payment') ? undefined : toAccountId,
             paymentMethod: type === 'expense' ? paymentMethod : undefined,
             debtId: type === 'debt_payment' ? debtId : undefined,
-        });
+        };
 
+        if (editId && onPendingEdit) {
+            // Edit mode: pass data to parent for confirmation
+            onPendingEdit(txnData);
+            return;
+        }
+
+        addTransaction(txnData);
         onSuccess();
     };
 
@@ -342,7 +354,7 @@ export const TransactionForm = ({ onSuccess, onCancel, initialValues }: Transact
                     </Button>
                 )}
                 <Button type="submit" className="flex-1">
-                    Guardar Movimiento
+                    {editId ? 'Guardar Cambios' : 'Guardar Movimiento'}
                 </Button>
             </div>
         </form>

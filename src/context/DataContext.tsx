@@ -19,6 +19,7 @@ interface DataContextType {
     user: { name: string };
     updateUser: (name: string) => Promise<void>;
     addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>;
+    updateTransaction: (txn: Transaction) => Promise<void>;
     deleteTransaction: (id: string) => Promise<void>;
     addAccount: (account: Omit<Account, 'id'>) => Promise<void>;
     updateAccount: (account: Account) => Promise<void>;
@@ -302,6 +303,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const updateTransaction = async (txn: Transaction) => {
+        if (!authUser) return;
+        await supabase.from('transactions').update({
+            date: txn.date,
+            type: txn.type,
+            amount: txn.amount,
+            concept: txn.concept,
+            category_id: txn.categoryId,
+            from_account_id: txn.fromAccountId,
+            to_account_id: txn.toAccountId,
+            payment_method: txn.paymentMethod,
+            debt_id: txn.debtId,
+        }).eq('id', txn.id);
+        fetchData();
+    };
+
     const deleteTransaction = async (id: string) => {
         await supabase.from('transactions').delete().eq('id', id);
         fetchData();
@@ -496,6 +513,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user: { name: userName },
             updateUser,
             addTransaction,
+            updateTransaction,
             deleteTransaction,
             addAccount,
             updateAccount,
