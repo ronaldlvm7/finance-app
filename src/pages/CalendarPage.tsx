@@ -9,6 +9,13 @@ import { TransactionForm } from '../components/forms/TransactionForm';
 import { cn, formatCurrency } from '../utils/utils';
 import type { Debt } from '../types';
 
+// Returns the amount due per installment for display on the calendar.
+const getMonthlyAmount = (debt: Debt): number => {
+    if (debt.type === 'subscription') return debt.totalAmount;
+    if (debt.installments && debt.installments > 0) return debt.totalAmount / debt.installments;
+    return debt.currentBalance;
+};
+
 // Returns the Date when `debt` occurs within the given month/year, or null.
 // Handles: subscriptions (infinite), installments (limited), and edge cases.
 const getDebtOccurrenceInMonth = (debt: Debt, year: number, month: number): Date | null => {
@@ -243,7 +250,7 @@ export const CalendarPage = () => {
                                                     <div>
                                                         <p className="font-bold text-orange-100">{debt.name}</p>
                                                         <p className="text-xs text-orange-300">
-                                                            {debt.type === 'subscription' ? 'Suscripción' : 'Deuda'} • Vence hoy
+                                                            {debt.type === 'subscription' ? 'Suscripción' : 'Deuda'} • {formatCurrency(getMonthlyAmount(debt))}
                                                         </p>
                                                     </div>
                                                     <button
@@ -420,7 +427,7 @@ const UpcomingEvents = ({ activeDebts, currentDate, onPayDebt }: UpcomingEventsP
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <p className="text-sm font-bold text-orange-300">{formatCurrency(debt.type === 'subscription' ? debt.totalAmount : debt.currentBalance)}</p>
+                                <p className="text-sm font-bold text-orange-300">{formatCurrency(getMonthlyAmount(debt))}</p>
                                 {isSameDisplayMonth && (
                                     <button
                                         onClick={() => onPayDebt(debt)}
