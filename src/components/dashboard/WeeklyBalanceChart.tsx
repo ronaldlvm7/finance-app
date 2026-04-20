@@ -1,7 +1,7 @@
 import { useData } from '../../context/DataContext';
 import { Card } from '../ui/Card';
 import { formatCurrency } from '../../utils/utils';
-import { startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, format, subWeeks, addWeeks } from 'date-fns';
+import { startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, format, subWeeks, addWeeks, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { LineChart, Line, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { useState } from 'react';
@@ -26,7 +26,7 @@ export const WeeklyBalanceChart = () => {
     // Aggregate Data
     const chartData = days.map(day => {
         const dayTransactions = data.transactions.filter(t =>
-            isSameDay(new Date(t.date), day) && t.type !== 'transfer'
+            isSameDay(parseISO(t.date), day) && t.type !== 'transfer'
         );
 
         const income = dayTransactions

@@ -92,7 +92,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             const mapTransactions = (list: any[]): Transaction[] => list?.map(item => ({
                 id: item.id,
-                date: item.date,
+                date: item.date ? String(item.date).substring(0, 10) : item.date,
                 type: item.type,
                 amount: Number(item.amount),
                 concept: item.concept,
@@ -123,7 +123,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 name: item.name,
                 targetAmount: Number(item.target_amount),
                 currentAmount: Number(item.current_amount),
-                deadline: item.deadline,
+                deadline: item.deadline ? String(item.deadline).substring(0, 10) : undefined,
                 icon: item.icon,
                 targetAccountId: item.target_account_id
             })) || [];
