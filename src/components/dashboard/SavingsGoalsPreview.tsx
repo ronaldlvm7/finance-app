@@ -1,62 +1,59 @@
-import { Target, Plus } from 'lucide-react';
-import { Card } from '../ui/Card';
+import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../../utils/utils';
 import { useData } from '../../context/DataContext';
-import { useNavigate } from 'react-router-dom';
+
+const GOAL_COLORS = ['#3B82F6', '#8B5CF6', '#22C55E', '#F59C2A', '#EF4444', '#06B6D4'];
 
 export const SavingsGoalsPreview = () => {
     const { data } = useData();
     const navigate = useNavigate();
+    const goals = data.goals.slice(0, 4);
 
-    // Take top 5 goals
-    const goals = data.goals.slice(0, 5);
+    if (goals.length === 0) return null;
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3">
             <div className="flex items-center justify-between px-1">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Target size={18} className="text-primary" />
-                    Mis Metas
-                </h3>
-                <button onClick={() => navigate('/goals')} className="text-sm text-primary font-medium hover:underline">Ver todo</button>
+                <h3 className="font-semibold text-[16px] text-foreground">Mis Metas</h3>
+                <button onClick={() => navigate('/goals')} className="text-sm text-primary font-semibold">
+                    Ver todo
+                </button>
             </div>
 
-            {/* Horizontal Scroll Container */}
-            <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 snap-x custom-scrollbar">
-                {/* Add New Goal Card */}
-                <div className="snap-start shrink-0">
-                    <button
-                        onClick={() => navigate('/goals')}
-                        className="w-32 h-40 rounded-3xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-2 hover:bg-white/5 transition-colors group"
-                    >
-                        <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Plus size={20} className="text-muted-foreground" />
-                        </div>
-                        <span className="text-xs font-medium text-muted-foreground">Nueva Meta</span>
-                    </button>
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+                {goals.map((goal, i) => {
+                    const progress = goal.targetAmount > 0
+                        ? Math.min((goal.currentAmount / goal.targetAmount) * 100, 100)
+                        : 0;
+                    const color = GOAL_COLORS[i % GOAL_COLORS.length];
 
-                {goals.map(goal => {
-                    const progress = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
                     return (
-                        <Card key={goal.id} className="snap-start shrink-0 w-40 h-40 p-4 flex flex-col justify-between bg-card border-white/5 relative overflow-hidden group">
-                            {/* Background Progress Bar */}
-                            <div
-                                className="absolute bottom-0 left-0 h-1 bg-primary"
-                                style={{ width: `${progress}%` }}
-                            />
+                        <button
+                            key={goal.id}
+                            onClick={() => navigate('/goals')}
+                            className="bg-card border border-border rounded-2xl p-4 flex flex-col gap-3 text-left hover:bg-secondary/50 transition-colors active:scale-[0.98]"
+                            style={{ boxShadow: 'var(--shadow-card)' }}
+                        >
+                            <p className="font-bold text-sm text-foreground truncate">{goal.name}</p>
 
-                            <div className="flex justify-between items-start">
-                                <span className="text-2xl">{goal.icon || '🎯'}</span>
-                                <span className="text-xs font-bold text-muted-foreground">{Math.round(progress)}%</span>
+                            {/* Progress bar */}
+                            <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+                                <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${progress}%`, background: color }}
+                                />
                             </div>
 
-                            <div>
-                                <h4 className="font-bold text-sm line-clamp-1">{goal.name}</h4>
-                                <p className="text-xs text-muted-foreground mt-1">{formatCurrency(goal.currentAmount)}</p>
-                                <p className="text-[10px] text-muted-foreground/50">de {formatCurrency(goal.targetAmount)}</p>
+                            {/* Amount + percentage */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">
+                                    {formatCurrency(goal.targetAmount)}
+                                </span>
+                                <span className="text-xs font-bold" style={{ color }}>
+                                    {Math.round(progress)}%
+                                </span>
                             </div>
-                        </Card>
+                        </button>
                     );
                 })}
             </div>

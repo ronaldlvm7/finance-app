@@ -49,36 +49,36 @@ export const DebtsPage = () => {
         <div className="space-y-6 fade-in pb-20 md:pb-0">
             {/* Header / Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl bg-gradient-to-br from-indigo-900/20 to-indigo-900/5">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
-                            <CalendarRange size={24} />
+                <div className="bg-card border border-border p-5 rounded-2xl" style={{ boxShadow: 'var(--shadow-card)' }}>
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2.5 bg-blue-50 rounded-xl text-blue-500 dark:bg-blue-500/15 dark:text-blue-400">
+                            <CalendarRange size={22} />
                         </div>
-                        <h2 className="text-gray-400 font-medium">Fijos Mensuales</h2>
+                        <h2 className="text-muted-foreground font-medium text-sm">Fijos Mensuales</h2>
                     </div>
-                    <p className="text-3xl font-bold text-white tracking-tight">
+                    <p className="text-[28px] font-bold text-foreground tracking-tight">
                         {totalMonthlyFixed.toLocaleString('es-PE', { style: 'currency', currency: 'PEN' })}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">Suscripciones + Cuotas</p>
+                    <p className="text-sm text-muted-foreground mt-1">Suscripciones + Cuotas</p>
                 </div>
 
-                <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl bg-gradient-to-br from-red-900/20 to-red-900/5">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-red-500/20 rounded-lg text-red-400">
-                            <Wallet size={24} />
+                <div className="bg-card border border-border p-5 rounded-2xl" style={{ boxShadow: 'var(--shadow-card)' }}>
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2.5 bg-red-50 rounded-xl text-destructive dark:bg-red-500/15 dark:text-red-400">
+                            <Wallet size={22} />
                         </div>
-                        <h2 className="text-gray-400 font-medium">Deuda Total Restante</h2>
+                        <h2 className="text-muted-foreground font-medium text-sm">Deuda Total Restante</h2>
                     </div>
-                    <p className="text-3xl font-bold text-white tracking-tight">
+                    <p className="text-[28px] font-bold text-foreground tracking-tight">
                         {totalRemainingDebt.toLocaleString('es-PE', { style: 'currency', currency: 'PEN' })}
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">Capital pendiente de pago</p>
+                    <p className="text-sm text-muted-foreground mt-1">Capital pendiente de pago</p>
                 </div>
             </div>
 
             {/* Actions */}
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-white">Mis Compromisos</h1>
+                <h1 className="ios-large-title">Mis Compromisos</h1>
                 <Button onClick={handleOpenAdd} variant="primary" className="flex items-center gap-2">
                     <PlusCircle size={18} />
                     <span className="hidden sm:inline">Nuevo Compromiso</span>

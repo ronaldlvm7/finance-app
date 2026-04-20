@@ -1,8 +1,12 @@
 import React from 'react';
 import { cn } from '../../utils/utils';
 
-export const Card = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div className={cn('rounded-3xl border border-white/5 bg-card text-card-foreground shadow-lg shadow-black/20', className)} {...props}>
+export const Card = ({ className, children, style, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+    <div
+        className={cn('rounded-2xl border border-border bg-card text-card-foreground', className)}
+        style={{ boxShadow: 'var(--shadow-card)', ...style }}
+        {...props}
+    >
         {children}
     </div>
 );
@@ -14,7 +18,7 @@ export const CardHeader = ({ className, children, ...props }: React.HTMLAttribut
 );
 
 export const CardTitle = ({ className, children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
-    <h3 className={cn('font-semibold leading-none tracking-tight', className)} {...props}>
+    <h3 className={cn('font-semibold leading-none tracking-tight text-foreground', className)} {...props}>
         {children}
     </h3>
 );

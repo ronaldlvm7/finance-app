@@ -120,24 +120,22 @@ export const CalendarPage = () => {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <header className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                    Calendario
-                </h1>
-                <div className="flex items-center gap-2 bg-card/50 p-1 rounded-xl border border-white/5">
-                    <button onClick={prevMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                        <ChevronLeft size={20} />
+                <div>
+                    <h1 className="ios-large-title">Calendario</h1>
+                    <p className="ios-subhead capitalize">{format(currentDate, 'MMMM yyyy', { locale: es })}</p>
+                </div>
+                <div className="flex items-center gap-1 bg-card border border-border p-1 rounded-xl" style={{ boxShadow: 'var(--shadow-card)' }}>
+                    <button onClick={prevMonth} className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                        <ChevronLeft size={18} />
                     </button>
-                    <span className="text-sm font-bold w-32 text-center capitalize">
-                        {format(currentDate, 'MMMM yyyy', { locale: es })}
-                    </span>
-                    <button onClick={nextMonth} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                        <ChevronRight size={20} />
+                    <button onClick={nextMonth} className="p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground hover:text-foreground">
+                        <ChevronRight size={18} />
                     </button>
                 </div>
             </header>
 
             {/* Calendar Grid */}
-            <div className="bg-card/50 backdrop-blur-xl border border-white/5 rounded-3xl p-4 overflow-hidden shadow-2xl">
+            <div className="bg-card border border-border rounded-3xl p-4 overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
                 {/* Weekday Headers */}
                 <div className="grid grid-cols-7 mb-2">
                     {['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'].map(day => (
@@ -168,8 +166,8 @@ export const CalendarPage = () => {
                                 onClick={() => handleDayClick(day)}
                                 className={cn(
                                     "group aspect-square rounded-xl md:rounded-2xl p-1 md:p-2 border relative transition-all hover:scale-105 active:scale-95 flex flex-col justify-between items-start",
-                                    isTodayDate ? "bg-primary/20 border-primary shadow-[0_0_15px_rgba(var(--primary),0.3)]" : "bg-card hover:bg-accent/50 border-white/5",
-                                    isSelected && !isTodayDate && "ring-2 ring-primary bg-accent"
+                                    isTodayDate ? "bg-primary/15 border-primary" : "bg-background hover:bg-secondary border-border",
+                                    isSelected && !isTodayDate && "ring-2 ring-primary bg-primary/8"
                                 )}
                             >
                                 <div className="flex justify-between w-full">
@@ -222,7 +220,7 @@ export const CalendarPage = () => {
                                         handleAddTransaction(e as any, selectedDate);
                                         setIsDetailsOpen(false);
                                     }}
-                                    className="w-full py-3 mt-2 border border-dashed border-white/20 rounded-xl flex items-center justify-center gap-2 text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
+                                    className="w-full py-3 mt-2 border border-dashed border-border rounded-xl flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                                 >
                                     <Plus size={18} /> Agregar Movimiento
                                 </button>
@@ -271,7 +269,7 @@ export const CalendarPage = () => {
                                                 <RefreshCw size={16} /> Movimientos
                                             </h3>
                                             {transactions.map(t => (
-                                                <div key={t.id} className="flex items-center justify-between p-3 bg-card border border-white/5 rounded-xl">
+                                                <div key={t.id} className="flex items-center justify-between p-3 bg-card border border-border rounded-xl">
                                                     <div className="flex items-center gap-3">
                                                         <div className={cn(
                                                             "p-2 rounded-lg",
@@ -312,6 +310,8 @@ export const CalendarPage = () => {
                 isOpen={isPayModalOpen}
                 onClose={() => setIsPayModalOpen(false)}
                 title={`Pagar ${selectedDebtToPay?.name || ''}`}
+                hideHeader
+                noPadding
             >
                 {selectedDebtToPay && (
                     <TransactionForm
@@ -336,6 +336,8 @@ export const CalendarPage = () => {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 title="Nuevo Movimiento"
+                hideHeader
+                noPadding
             >
                 {dateForAdd && (
                     <TransactionForm
@@ -407,7 +409,7 @@ const UpcomingEvents = ({ activeDebts, currentDate, onPayDebt }: UpcomingEventsP
                                 "flex items-center justify-between p-3.5 rounded-2xl border",
                                 isOverdue
                                     ? "bg-red-500/10 border-red-500/20"
-                                    : "bg-card border-white/5"
+                                    : "bg-card border-border"
                             )}
                         >
                             <div className="flex items-center gap-3">

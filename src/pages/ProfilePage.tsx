@@ -62,14 +62,14 @@ export const ProfilePage = () => {
             {/* Menu Groups */}
             <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider ml-1">General</h3>
-                <Card className="divide-y divide-white/5 overflow-hidden">
+                <Card className="divide-y divide-border overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
                     <MenuItem icon={<User size={20} />} label="Editar Perfil" onClick={() => setIsEditProfileOpen(true)} />
                     <MenuItem icon={<Wallet size={20} />} label="Mis Cuentas" onClick={() => setIsAccountsOpen(true)} />
                     <MenuItem icon={<Shield size={20} />} label="Seguridad y Privacidad" onClick={() => setIsSecurityOpen(true)} />
                 </Card>
 
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider ml-1 mt-6">Datos</h3>
-                <Card className="divide-y divide-white/5 overflow-hidden">
+                <Card className="divide-y divide-border overflow-hidden" style={{ boxShadow: 'var(--shadow-card)' }}>
                     <MenuItem
                         icon={<Settings size={20} />}
                         label="Ir a Configuración"
@@ -100,13 +100,13 @@ export const ProfilePage = () => {
 
             {/* Security Modal */}
             <Modal isOpen={isSecurityOpen} onClose={() => setIsSecurityOpen(false)} title="Seguridad y Privacidad">
-                <div className="space-y-4 text-sm text-gray-300">
-                    <div className="bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20 text-emerald-400 flex gap-3">
+                <div className="space-y-4 text-sm text-foreground">
+                    <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 text-emerald-600 flex gap-3 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400">
                         <Shield className="shrink-0 mt-0.5" />
                         <p>Tu cuenta está protegida con autenticación segura vía Supabase. Solo tú puedes acceder a tus datos.</p>
                     </div>
                     <p>Esta aplicación almacena tus datos en la nube mediante <strong>Supabase</strong>. Esto significa que:</p>
-                    <ul className="list-disc pl-5 space-y-2 text-gray-400">
+                    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                         <li>Tus finanzas están disponibles desde cualquier dispositivo.</li>
                         <li>Los datos se sincronizan en tiempo real con tu cuenta.</li>
                         <li>Solo tú, con tu usuario y contraseña, tienes acceso.</li>
@@ -151,7 +151,7 @@ const AccountsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                     </div>
 
                     {data.accounts.filter(a => a.type !== 'credit_card').map(acc => (
-                        <Card key={acc.id} className="p-4 flex items-center justify-between bg-secondary/20 border-white/5">
+                        <Card key={acc.id} className="p-4 flex items-center justify-between bg-secondary border-border">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-xl bg-card flex items-center justify-center text-lg">
                                     {acc.type === 'cash' ? '💵' : '🏦'}
@@ -175,7 +175,7 @@ const AccountsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                         </Card>
                     ))}
 
-                    <div className="pt-4 border-t border-white/5">
+                    <div className="pt-4 border-t border-border">
                         <p className="text-xs text-muted-foreground text-center mb-2">Tarjetas de Crédito</p>
                         {data.accounts.filter(a => a.type === 'credit_card').map(acc => (
                             <div key={acc.id} className="p-3 flex items-center justify-between opacity-70">
@@ -216,7 +216,7 @@ const AccountsDrawer = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 const MenuItem = ({ icon, label, onClick, textColor = 'text-foreground', showArrow = true }: any) => (
     <button
         onClick={onClick}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-all group active:bg-white/10"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-all group active:bg-secondary/80"
     >
         <div className={`flex items-center gap-4 ${textColor}`}>
             <span className="text-muted-foreground group-hover:text-primary transition-colors">{icon}</span>

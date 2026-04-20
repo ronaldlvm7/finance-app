@@ -3,7 +3,65 @@
 @tailwind utilities;
 
 @layer base {
+  /* ── LIGHT (default) ─────────────────────────────── */
   :root {
+    /* Warm off-white background */
+    --background: 35 23% 97%;
+    --foreground: 222 47% 11%;
+
+    /* White cards */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary Amber: #F59C2A */
+    --primary: 37 91% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Subtle surface */
+    --secondary: 35 17% 94%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 35 17% 94%;
+    --muted-foreground: 220 9% 46%;
+
+    /* FAB uses primary */
+    --accent: 37 91% 56%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Red destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Warm border */
+    --border: 35 14% 88%;
+    --input: 35 14% 88%;
+    --ring: 37 91% 56%;
+
+    /* Chart colors */
+    --chart-1: 217 91% 60%;
+    --chart-2: 340 82% 52%;
+    --chart-3: 40 100% 50%;
+    --chart-4: 142 71% 45%;
+    --chart-5: 37 91% 56%;
+
+    --radius: 1.25rem;
+
+    /* iPhone safe area insets */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+
+    /* Card shadow */
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.07);
+    --shadow-card-hover: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* ── DARK ────────────────────────────────────────── */
+  .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 9%;
@@ -21,8 +79,7 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
-    /* Teal/Cyan Accent for FAB: #00D9C0 */
-    --accent: 172 100% 42%;
+    --accent: 28 100% 63%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
@@ -38,108 +95,71 @@
     --chart-4: 142 71% 45%;
     --chart-5: 28 100% 63%;
 
-    --radius: 1rem;
-
-    /* iPhone safe area insets */
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-left: env(safe-area-inset-left, 0px);
-    --safe-right: env(safe-area-inset-right, 0px);
-  }
-
-  /* Light mode */
-  .light {
-    --background: 220 20% 97%;
-    --foreground: 240 10% 8%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 8%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 8%;
-
-    --primary: 28 100% 53%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 14% 92%;
-    --secondary-foreground: 240 10% 8%;
-
-    --muted: 220 14% 92%;
-    --muted-foreground: 240 5% 46%;
-
-    --accent: 172 100% 35%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 72% 45%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 220 14% 88%;
-    --input: 220 14% 88%;
-    --ring: 28 100% 53%;
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover: 0 4px 24px rgba(0, 0, 0, 0.6);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
-    /* Remove gray tap flash on iOS */
     -webkit-tap-highlight-color: transparent;
   }
 
   html {
-    /* Prevent font size boost on orientation change (iOS) */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    /* Smooth momentum scrolling on iOS */
     -webkit-overflow-scrolling: touch;
-    /* Prevent overscroll bounce on body (keep it on scroll containers) */
     overscroll-behavior: none;
   }
 
-  /* Prevent iOS input zoom — inputs must be 16px+ */
+  /* Prevent iOS input zoom */
   input, textarea, select {
     font-size: 16px !important;
   }
 
-  /* Better focus ring for accessibility (not the default iOS blue) */
   :focus-visible {
     outline: 2px solid hsl(var(--primary));
     outline-offset: 2px;
   }
 }
 
-/* Utility: full dynamic viewport height (fixes iOS Safari address bar) */
-.h-dvh {
-  height: 100dvh;
+/* ── Utilities ───────────────────────────────────── */
+
+.h-dvh  { height: 100dvh; }
+.min-h-dvh { min-height: 100dvh; }
+
+.pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+
+/* Card with design-system shadow */
+.card-shadow {
+  box-shadow: var(--shadow-card);
 }
-.min-h-dvh {
-  min-height: 100dvh;
+.card-shadow-hover:hover {
+  box-shadow: var(--shadow-card-hover);
 }
 
-/* Utility: safe area padding helpers */
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-.pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
+/* Glass panel — adapts to light/dark */
 .glass-panel {
-  @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-xl;
-}
-
-.light .glass-panel {
-  @apply border-black/5;
+  @apply bg-card/80 backdrop-blur-md border border-border shadow-sm;
 }
 
 .premium-card {
-  @apply bg-card border border-white/5 shadow-lg shadow-black/40;
+  @apply bg-card border border-border;
+  box-shadow: var(--shadow-card);
 }
 
-.light .premium-card {
-  @apply border-black/5 shadow-black/10;
+/* In dark mode use stronger glass */
+.dark .glass-panel {
+  @apply bg-card/80 backdrop-blur-md border border-white/5 shadow-xl;
+}
+.dark .premium-card {
+  @apply border-white/5 shadow-black/40;
 }
 
 /* iOS Typography Scale */
@@ -174,3 +194,7 @@
   letter-spacing: 0.1px;
   color: hsl(var(--muted-foreground));
 }
+
+/* Scrollbar hide */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }

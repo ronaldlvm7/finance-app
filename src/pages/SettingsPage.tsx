@@ -61,7 +61,7 @@ export const SettingsPage = () => {
             {/* General Settings */}
             <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider ml-1">General</h3>
-                <Card className="divide-y divide-white/5 overflow-hidden">
+                <Card className="divide-y divide-border overflow-hidden">
                     <SettingsItem
                         icon={<Tag size={20} />}
                         label="Categorías de Ingresos y Gastos"
@@ -74,7 +74,7 @@ export const SettingsPage = () => {
             {/* Data Management */}
             <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider ml-1">Datos y Seguridad</h3>
-                <Card className="divide-y divide-white/5 overflow-hidden">
+                <Card className="divide-y divide-border overflow-hidden">
                     <SettingsItem
                         icon={<Download size={20} />}
                         label="Exportar Copia de Seguridad"
@@ -110,7 +110,7 @@ export const SettingsPage = () => {
 const SettingsItem = ({ icon, label, description, onClick }: { icon: React.ReactNode, label: string, description?: string, onClick: () => void }) => (
     <button
         onClick={onClick}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-all group active:bg-white/10 text-left"
+        className="w-full p-4 flex items-center justify-between hover:bg-secondary transition-all group active:bg-secondary/80 text-left"
     >
         <div className="flex items-center gap-4">
             <div className="p-2 bg-secondary rounded-lg text-foreground">

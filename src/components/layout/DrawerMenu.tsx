@@ -36,7 +36,7 @@ export const DrawerMenu = ({ isOpen, onClose }: DrawerMenuProps) => {
             {/* Backdrop */}
             <div
                 className={cn(
-                    "fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300",
+                    "fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50 transition-opacity duration-300",
                     isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
                 )}
                 onClick={onClose}
@@ -45,12 +45,12 @@ export const DrawerMenu = ({ isOpen, onClose }: DrawerMenuProps) => {
             {/* Side Drawer */}
             <div
                 className={cn(
-                    "fixed top-0 left-0 h-full w-[80%] max-w-sm bg-card border-r border-white/10 z-50 transition-transform duration-300 ease-out transform flex flex-col",
+                    "fixed top-0 left-0 h-full w-[80%] max-w-sm bg-card border-r border-border z-50 transition-transform duration-300 ease-out transform flex flex-col",
                     isOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
                 {/* Header */}
-                <div className="p-6 border-b border-white/5 flex items-center justify-between bg-gradient-to-br from-primary/10 to-transparent shrink-0">
+                <div className="p-6 border-b border-border flex items-center justify-between bg-gradient-to-br from-primary/8 to-transparent shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-primary to-accent p-[2px] shadow-lg shadow-primary/20">
                             <div className="h-full w-full rounded-full bg-card overflow-hidden">
@@ -66,7 +66,7 @@ export const DrawerMenu = ({ isOpen, onClose }: DrawerMenuProps) => {
                             <p className="text-xs text-muted-foreground truncate max-w-[150px]">{authUser?.email}</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-secondary rounded-lg transition-colors">
                         <X size={20} className="text-muted-foreground" />
                     </button>
                 </div>
@@ -78,26 +78,26 @@ export const DrawerMenu = ({ isOpen, onClose }: DrawerMenuProps) => {
                     <DrawerItem to="/transactions" icon={<Wallet size={20} />} label="Movimientos" onClick={onClose} />
                     <DrawerItem to="/calendar" icon={<CalendarRange size={20} />} label="Calendario" onClick={onClose} />
 
-                    <div className="my-3 h-px bg-white/5 mx-2" />
+                    <div className="my-3 h-px bg-border mx-2" />
 
                     <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest px-4 pb-1">Finanzas</p>
                     <DrawerItem to="/goals" icon={<Target size={20} />} label="Mis Metas" onClick={onClose} />
                     <DrawerItem to="/cards" icon={<CreditCard size={20} />} label="Mis Tarjetas" onClick={onClose} />
                     <DrawerItem to="/debts" icon={<Wallet size={20} />} label="Mis Deudas" onClick={onClose} />
 
-                    <div className="my-3 h-px bg-white/5 mx-2" />
+                    <div className="my-3 h-px bg-border mx-2" />
 
                     <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest px-4 pb-1">Cuenta</p>
                     <DrawerItem to="/settings" icon={<Settings size={20} />} label="Configuración" onClick={onClose} />
                     <DrawerItem to="/profile" icon={<Shield size={20} />} label="Perfil y Seguridad" onClick={onClose} />
 
-                    <div className="my-3 h-px bg-white/5 mx-2" />
+                    <div className="my-3 h-px bg-border mx-2" />
 
                     <a
                         href="https://github.com/ronaldlvm7/finance-app"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-all group"
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-secondary hover:text-foreground transition-all group"
                     >
                         <Info size={20} />
                         <span className="font-medium text-sm">Acerca de la App</span>
@@ -105,7 +105,7 @@ export const DrawerMenu = ({ isOpen, onClose }: DrawerMenuProps) => {
                 </div>
 
                 {/* Footer / Logout */}
-                <div className="shrink-0 p-4 border-t border-white/5 bg-card">
+                <div className="shrink-0 p-4 border-t border-border bg-card">
                     <button
                         onClick={() => {
                             signOut();
@@ -131,7 +131,7 @@ const DrawerItem = ({ to, icon, label, onClick }: { to: string; icon: React.Reac
         className={({ isActive }) =>
             cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
-                isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-white/5 hover:text-white"
+                isActive ? "bg-primary/12 text-primary font-semibold" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
             )
         }
     >

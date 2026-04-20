@@ -1,9 +1,8 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Home, Wallet, User, Plus, CalendarRange, Menu, Target } from 'lucide-react';
+import { Home, Wallet, User, Plus, CalendarRange, Target, CreditCard } from 'lucide-react';
 import { cn } from '../../utils/utils';
 import { useState, useEffect, useRef } from 'react';
 import { DrawerMenu } from './DrawerMenu';
-import { CreditCard } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { TransactionForm } from '../forms/TransactionForm';
 
@@ -34,13 +33,11 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
         return () => window.removeEventListener('OPEN_GHOST_TRANSACTION_MODAL', handleOpenModal);
     }, []);
 
-    // Reset scroll state on route change
     useEffect(() => {
         setScrolled(false);
         if (mainRef.current) mainRef.current.scrollTop = 0;
     }, [location.pathname]);
 
-    // Track scroll to collapse Large Title into header
     useEffect(() => {
         const el = mainRef.current;
         if (!el) return;
@@ -55,24 +52,27 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
 
             {/* Mobile Header */}
             <header
-                className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 transition-colors duration-300"
+                className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-5 transition-all duration-300"
                 style={{
                     paddingTop: `max(env(safe-area-inset-top, 0px), 0px)`,
                     height: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
-                    background: scrolled ? 'hsl(var(--card) / 0.85)' : 'transparent',
-                    backdropFilter: scrolled ? 'blur(16px)' : 'none',
-                    WebkitBackdropFilter: scrolled ? 'blur(16px)' : 'none',
+                    background: scrolled ? 'hsl(var(--card) / 0.92)' : 'transparent',
+                    backdropFilter: scrolled ? 'blur(20px)' : 'none',
+                    WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
                     borderBottom: scrolled ? '1px solid hsl(var(--border))' : '1px solid transparent',
                 }}
             >
                 <button
                     onClick={() => setIsDrawerOpen(true)}
-                    className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="p-2 -ml-1.5 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                    <Menu size={22} />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
                 </button>
 
-                {/* Page title — fades in when scrolled past large title */}
                 <span
                     className="font-bold text-[17px] tracking-tight transition-all duration-300 absolute left-1/2 -translate-x-1/2"
                     style={{
@@ -83,7 +83,7 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                     {pageTitle}
                 </span>
 
-                <div className="w-10" />
+                <div className="w-8" />
             </header>
 
             {/* Main Content Area */}
@@ -92,10 +92,10 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                 className="flex-1 overflow-y-auto md:pt-0 md:pb-0 md:pl-64"
                 style={{
                     paddingTop: 'calc(3.5rem + env(safe-area-inset-top, 0px))',
-                    paddingBottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
+                    paddingBottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))',
                 }}
             >
-                <div className="container max-w-lg mx-auto p-4 md:max-w-4xl md:p-8">
+                <div className="container max-w-lg mx-auto px-4 py-4 md:max-w-4xl md:p-8">
                     {children || <Outlet />}
                 </div>
             </main>
@@ -105,6 +105,8 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                 isOpen={isTransactionModalOpen}
                 onClose={() => setIsTransactionModalOpen(false)}
                 title="Nuevo Movimiento"
+                hideHeader
+                noPadding
             >
                 <TransactionForm
                     onSuccess={() => setIsTransactionModalOpen(false)}
@@ -114,37 +116,38 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
 
             {/* Bottom Navigation */}
             <nav
-                className="md:hidden fixed left-4 right-4 h-16 bg-card/90 backdrop-blur-xl border border-border rounded-2xl z-40 flex items-center justify-between px-2 shadow-2xl shadow-black/20"
-                style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+                className="md:hidden fixed left-0 right-0 bottom-0 bg-card border-t border-border z-40 flex items-center justify-around px-2"
+                style={{
+                    paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
+                    paddingTop: '8px',
+                }}
             >
-                <NavItem to="/" icon={<Home size={22} />} label="Home" />
+                <NavItem to="/" icon={<Home size={22} />} label="Inicio" />
                 <NavItem to="/transactions" icon={<Wallet size={22} />} label="Gastos" />
-                <div className="w-14" />
+
+                {/* FAB center */}
+                <div className="flex flex-col items-center gap-1 pb-1">
+                    <button
+                        onClick={() => window.dispatchEvent(new CustomEvent('OPEN_GHOST_TRANSACTION_MODAL'))}
+                        className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground active:scale-95 transition-all outline-none"
+                        style={{ boxShadow: '0 6px 24px rgba(245,156,42,0.5)' }}
+                    >
+                        <Plus size={26} strokeWidth={2.5} />
+                    </button>
+                    <span className="text-[10px] font-semibold text-muted-foreground">Nuevo</span>
+                </div>
+
                 <NavItem to="/calendar" icon={<CalendarRange size={22} />} label="Calendario" />
                 <NavItem to="/profile" icon={<User size={22} />} label="Perfil" />
             </nav>
 
-            {/* FAB */}
-            <div
-                className="md:hidden fixed left-1/2 -translate-x-1/2 z-50"
-                style={{ bottom: 'calc(2.75rem + env(safe-area-inset-bottom, 0px))' }}
-            >
-                <button
-                    onClick={() => window.dispatchEvent(new CustomEvent('OPEN_GHOST_TRANSACTION_MODAL'))}
-                    className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-foreground shadow-lg shadow-accent/40 hover:scale-110 active:scale-95 transition-all outline-none ring-4 ring-background"
-                    style={{ boxShadow: '0 8px 28px rgba(0,217,192,0.45), 0 2px 8px rgba(0,0,0,0.3)' }}
-                >
-                    <Plus size={28} strokeWidth={2.5} />
-                </button>
-            </div>
-
             {/* Sidebar (Desktop) */}
-            <aside className="hidden md:flex fixed top-0 left-0 w-64 h-full flex-col border-r border-white/10 bg-card/50 backdrop-blur-xl p-4">
-                <div className="flex items-center gap-2 mb-8 px-2">
-                    <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+            <aside className="hidden md:flex fixed top-0 left-0 w-64 h-full flex-col border-r border-border bg-card p-4">
+                <div className="flex items-center gap-3 mb-8 px-2">
+                    <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-lg" style={{ boxShadow: '0 4px 12px rgba(245,156,42,0.4)' }}>
                         <Wallet className="text-white h-5 w-5" />
                     </div>
-                    <h1 className="text-xl font-bold tracking-tight">Finanzas</h1>
+                    <h1 className="text-xl font-bold tracking-tight text-foreground">Finanzas</h1>
                 </div>
                 <div className="space-y-1">
                     <SidebarItem to="/" icon={<Home size={20} />} label="Dashboard" />
@@ -158,7 +161,8 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
                 <div className="mt-auto">
                     <button
                         onClick={() => window.dispatchEvent(new CustomEvent('OPEN_GHOST_TRANSACTION_MODAL'))}
-                        className="flex w-full items-center gap-3 rounded-xl bg-accent px-4 py-3 text-accent-foreground font-bold hover:bg-accent/90 transition-colors shadow-lg shadow-accent/20"
+                        className="flex w-full items-center gap-3 rounded-xl bg-primary px-4 py-3 text-primary-foreground font-bold hover:bg-primary/90 transition-colors"
+                        style={{ boxShadow: '0 4px 16px rgba(245,156,42,0.35)' }}
                     >
                         <Plus size={20} /> Nuevo Movimiento
                     </button>
@@ -169,47 +173,30 @@ export const AppShell = ({ children }: { children?: React.ReactNode }) => {
 };
 
 const NavItem = ({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) => (
-    <NavLink to={to} end={to === '/'} className="relative flex flex-col items-center justify-center w-16 py-1.5 outline-none">
+    <NavLink to={to} end={to === '/'} className="relative flex flex-col items-center justify-center w-16 py-1 outline-none">
         {({ isActive }) => (
             <>
-                {/* Blob background */}
+                {/* Pill background */}
                 <span
-                    className="absolute inset-0 rounded-xl transition-all duration-300"
+                    className="absolute inset-x-1 rounded-xl transition-all duration-300"
                     style={{
-                        background: isActive ? 'rgba(255,159,67,0.13)' : 'transparent',
-                        transform: isActive ? 'scale(1)' : 'scale(0.8)',
-                        opacity: isActive ? 1 : 0,
+                        top: '2px',
+                        height: '32px',
+                        background: isActive ? 'hsl(var(--primary) / 0.12)' : 'transparent',
                     }}
                 />
-                {/* Icon */}
                 <span
-                    className="relative z-10 transition-all duration-300"
-                    style={{
-                        color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                        transform: isActive ? 'scale(1.15) translateY(-1px)' : 'scale(1)',
-                    }}
+                    className="relative z-10 transition-all duration-200"
+                    style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
                 >
                     {icon}
                 </span>
-                {/* Label */}
                 <span
-                    className="relative z-10 text-[10px] font-medium transition-all duration-300 mt-0.5"
-                    style={{
-                        color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))',
-                        fontWeight: isActive ? 700 : 500,
-                    }}
+                    className="relative z-10 text-[10px] font-semibold mt-0.5"
+                    style={{ color: isActive ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))' }}
                 >
                     {label}
                 </span>
-                {/* Orange dot indicator */}
-                <span
-                    className="absolute bottom-1 left-1/2 -translate-x-1/2 rounded-full bg-primary transition-all duration-300"
-                    style={{
-                        width: isActive ? '4px' : '0px',
-                        height: isActive ? '4px' : '0px',
-                        opacity: isActive ? 1 : 0,
-                    }}
-                />
             </>
         )}
     </NavLink>
@@ -222,7 +209,9 @@ const SidebarItem = ({ to, icon, label }: { to: string; icon: React.ReactNode; l
         className={({ isActive }) =>
             cn(
                 'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-medium text-sm',
-                isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                isActive
+                    ? 'bg-primary/10 text-primary font-semibold'
+                    : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
             )
         }
     >
