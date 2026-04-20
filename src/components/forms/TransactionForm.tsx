@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import type { TransactionType, Transaction, Account } from '../../types';
 import { format } from 'date-fns';
@@ -115,7 +115,7 @@ const AccountSelector = ({
     </div>
 );
 
-export const TransactionForm = ({ onSuccess, onCancel, initialValues, editId, onPendingEdit }: TransactionFormProps) => {
+export const TransactionForm = ({ onSuccess, onCancel: _onCancel, initialValues, editId, onPendingEdit }: TransactionFormProps) => {
     const { addTransaction, addCategory, data } = useData();
     const isFirstMount = useRef(true);
 
