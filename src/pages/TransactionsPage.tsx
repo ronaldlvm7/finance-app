@@ -31,9 +31,12 @@ export const TransactionsPage = () => {
     const [editTxn, setEditTxn] = useState<Transaction | null>(null);
     const [pendingEditData, setPendingEditData] = useState<Omit<Transaction, 'id'> | null>(null);
 
-    const allSorted = [...data.transactions].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
+    const allSorted = [...data.transactions].sort((a, b) => {
+        const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
+        if (dateDiff !== 0) return dateDiff;
+        // Same day: use created_at to preserve registration order (most recent first)
+        return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
+    });
 
     const filtered = allSorted.filter(txn => {
         const matchMonth = isSameMonth(parseISO(txn.date), currentMonth);

@@ -15,6 +15,7 @@ export type PaymentMethod = 'cash' | 'debit' | 'credit'; // credit means using t
 export interface Transaction {
     id: string;
     date: string; // ISO string
+    createdAt?: string; // ISO timestamp, for ordering within the same day
     type: TransactionType;
     amount: number;
     concept: string;

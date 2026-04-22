@@ -75,7 +75,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 { data: profile }
             ] = await Promise.all([
                 supabase.from('accounts').select('*').eq('is_archived', false),
-                supabase.from('transactions').select('*').order('date', { ascending: false }),
+                supabase.from('transactions').select('*').order('date', { ascending: false }).order('created_at', { ascending: false }),
                 supabase.from('categories').select('*'),
                 supabase.from('debts').select('*').neq('status', 'cancelled'),
                 supabase.from('goals').select('*'),
@@ -94,6 +94,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const mapTransactions = (list: any[]): Transaction[] => list?.map(item => ({
                 id: item.id,
                 date: item.date ? String(item.date).substring(0, 10) : item.date,
+                createdAt: item.created_at,
                 type: item.type,
                 amount: Number(item.amount),
                 concept: item.concept,
