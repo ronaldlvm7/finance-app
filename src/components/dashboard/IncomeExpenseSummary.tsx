@@ -11,7 +11,7 @@ export const IncomeExpenseSummary = () => {
     const txns = data.transactions.filter(t => t.date.startsWith(currentMonth));
 
     const income = txns.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const expenses = txns.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const expenses = txns.filter(t => t.type === 'expense' || t.type === 'debt_payment').reduce((sum, t) => sum + t.amount, 0);
     const balance = income - expenses;
     const savingsRate = income > 0 ? Math.round((balance / income) * 100) : 0;
 

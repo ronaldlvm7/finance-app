@@ -254,14 +254,44 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         // --- TRANSFER ---
         else if (txnData.type === 'transfer') {
-            if (txnData.fromAccountId) await rpcUpdateBalance(txnData.fromAccountId, -txnData.amount);
+            if (txnData.fromAccountId) {
+                await rpcUpdateBalance(txnData.fromAccountId, -txnData.amount);
+
+                // If transfer FROM credit card (cash advance): increase CC debt
+                const fromAccount = data.accounts.find(a => a.id === txnData.fromAccountId);
+                if (fromAccount?.type === 'credit_card') {
+                    const { data: ccDebt } = await supabase.from('debts')
+                        .select('*')
+                        .eq('account_id', txnData.fromAccountId)
+                        .eq('type', 'credit_card')
+                        .eq('status', 'active')
+                        .single();
+
+                    if (ccDebt) {
+                        await supabase.from('debts').update({
+                            current_balance: ccDebt.current_balance + txnData.amount,
+                            total_amount: ccDebt.total_amount + txnData.amount
+                        }).eq('id', ccDebt.id);
+                    } else {
+                        const acc = data.accounts.find(a => a.id === txnData.fromAccountId);
+                        await supabase.from('debts').insert({
+                            user_id: authUser.id,
+                            name: `Deuda ${acc?.name || 'Tarjeta'}`,
+                            type: 'credit_card',
+                            total_amount: txnData.amount,
+                            current_balance: txnData.amount,
+                            status: 'active',
+                            account_id: txnData.fromAccountId
+                        });
+                    }
+                }
+            }
             if (txnData.toAccountId) {
                 await rpcUpdateBalance(txnData.toAccountId, txnData.amount);
 
-                // If transfer TO credit card (Payment)
+                // If transfer TO credit card (payment): reduce CC debt
                 const toAccount = data.accounts.find(a => a.id === txnData.toAccountId);
                 if (toAccount?.type === 'credit_card') {
-                    // Reduce Debt
                     const { data: debts } = await supabase.from('debts')
                         .select('*')
                         .eq('account_id', txnData.toAccountId)
