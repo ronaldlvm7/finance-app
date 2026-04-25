@@ -27,16 +27,16 @@ export const WeeklyBalanceChart = () => {
             isSameDay(parseISO(t.date), day) && t.type !== 'transfer'
         );
         const income = dayTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-        const expense = dayTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const expense = dayTransactions.filter(t => t.type === 'expense' || t.type === 'debt_payment').reduce((sum, t) => sum + t.amount, 0);
         return {
             day: format(day, 'EEE', { locale: es }).charAt(0).toUpperCase() + format(day, 'EEE', { locale: es }).slice(1),
             ingresos: income,
-            egresos: expense,
+            gastos: expense,
         };
     });
 
     const totalIncome = chartData.reduce((acc, c) => acc + c.ingresos, 0);
-    const totalExpense = chartData.reduce((acc, c) => acc + c.egresos, 0);
+    const totalExpense = chartData.reduce((acc, c) => acc + c.gastos, 0);
     const weeklyBalance = totalIncome - totalExpense;
 
     const CustomTooltip = ({ active, payload, label }: any) => {
@@ -48,7 +48,7 @@ export const WeeklyBalanceChart = () => {
                         <ArrowDown size={12} /> +{formatCurrency(payload[0].value)}
                     </p>
                     <p className="text-destructive text-sm font-bold flex items-center gap-1">
-                        <ArrowUp size={12} /> -{formatCurrency(payload[1].value)}
+                        <ArrowUp size={12} /> -{formatCurrency(payload[1]?.value ?? 0)}
                     </p>
                 </div>
             );
@@ -71,7 +71,7 @@ export const WeeklyBalanceChart = () => {
                 </Card>
                 <Card className="p-4 flex items-center justify-between border-border" style={{ boxShadow: 'var(--shadow-card)' }}>
                     <div>
-                        <p className="text-xs text-muted-foreground mb-1">Egresos</p>
+                        <p className="text-xs text-muted-foreground mb-1">Gastos</p>
                         <p className="text-lg font-bold text-destructive">{formatCurrency(totalExpense)}</p>
                     </div>
                     <div className="h-9 w-9 rounded-xl bg-red-50 flex items-center justify-center text-destructive dark:bg-red-500/10">
@@ -116,7 +116,7 @@ export const WeeklyBalanceChart = () => {
                                 />
                                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--border))', strokeWidth: 2 }} />
                                 <Line type="monotone" dataKey="ingresos" stroke="#22C55E" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#22C55E', strokeWidth: 0 }} />
-                                <Line type="monotone" dataKey="egresos" stroke="#EF4444" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} />
+                                <Line type="monotone" dataKey="gastos" stroke="#EF4444" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#EF4444', strokeWidth: 0 }} />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -128,7 +128,7 @@ export const WeeklyBalanceChart = () => {
                         </div>
                         <div className="flex items-center gap-2">
                             <div className="w-2.5 h-2.5 rounded-full bg-destructive" />
-                            <span className="text-xs text-muted-foreground">Egresos</span>
+                            <span className="text-xs text-muted-foreground">Gastos</span>
                         </div>
                     </div>
                 </div>
