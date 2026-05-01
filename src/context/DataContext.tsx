@@ -260,13 +260,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // If transfer FROM credit card (cash advance): increase CC debt
                 const fromAccount = data.accounts.find(a => a.id === txnData.fromAccountId);
                 if (fromAccount?.type === 'credit_card') {
-                    const { data: ccDebt } = await supabase.from('debts')
+                    const { data: ccDebts } = await supabase.from('debts')
                         .select('*')
                         .eq('account_id', txnData.fromAccountId)
                         .eq('type', 'credit_card')
                         .eq('status', 'active')
-                        .single();
+                        .order('created_at', { ascending: false })
+                        .limit(1);
 
+                    const ccDebt = ccDebts?.[0];
                     if (ccDebt) {
                         await supabase.from('debts').update({
                             current_balance: ccDebt.current_balance + txnData.amount,
@@ -292,19 +294,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // If transfer TO credit card (payment): reduce CC debt
                 const toAccount = data.accounts.find(a => a.id === txnData.toAccountId);
                 if (toAccount?.type === 'credit_card') {
-                    const { data: debts } = await supabase.from('debts')
+                    const { data: ccDebts } = await supabase.from('debts')
                         .select('*')
                         .eq('account_id', txnData.toAccountId)
                         .eq('type', 'credit_card')
                         .eq('status', 'active')
-                        .single();
+                        .order('created_at', { ascending: false });
 
-                    if (debts) {
-                        const newBalance = debts.current_balance - txnData.amount;
+                    // Distribute payment across all active CC debts for this account
+                    let remaining = txnData.amount;
+                    for (const ccDebt of ccDebts || []) {
+                        if (remaining <= 0) break;
+                        const reduction = Math.min(remaining, ccDebt.current_balance);
+                        const newBalance = ccDebt.current_balance - reduction;
                         await supabase.from('debts').update({
                             current_balance: newBalance,
                             status: newBalance <= 0 ? 'paid' : 'active'
-                        }).eq('id', debts.id);
+                        }).eq('id', ccDebt.id);
+                        remaining -= reduction;
                     }
                 }
             }
@@ -318,6 +325,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     current_balance: newBalance,
                     status: newBalance <= 0 ? 'paid' : 'active'
                 }).eq('id', txnData.debtId);
+
+                // Restore available credit on the linked CC account
+                if (debt.accountId && debt.type === 'credit_card') {
+                    await rpcUpdateBalance(debt.accountId, txnData.amount);
+                }
             }
             if (txnData.fromAccountId) {
                 await rpcUpdateBalance(txnData.fromAccountId, -txnData.amount);

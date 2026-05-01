@@ -38,7 +38,7 @@ export const BalanceWidget = () => {
             let displayLabel = 'Saldo disponible';
             if (acc.type === 'credit_card') {
                 const limit = acc.creditLimit || 0;
-                const accountDebts = data.debts.filter(d => d.accountId === acc.id && d.status === 'active');
+                const accountDebts = data.debts.filter(d => d.accountId === acc.id && d.type === 'credit_card' && d.status === 'active');
                 const totalDebt = accountDebts.reduce((sum, d) => sum + d.currentBalance, 0);
                 displayBalance = limit - totalDebt;
                 displayLabel = 'Crédito disponible';
