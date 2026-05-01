@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
-import type { TransactionType, Transaction, Account } from '../../types';
+import type { TransactionType, Transaction, Account, Debt } from '../../types';
 import { format } from 'date-fns';
 
 export interface TransactionFormProps {
@@ -72,11 +72,23 @@ const SummaryRow = ({ label, value }: { label: string; value: string }) => (
     </div>
 );
 
+const getAccountDisplayBalance = (account: Account, debts: Debt[]): number => {
+    if (account.type === 'credit_card') {
+        const limit = account.creditLimit || 0;
+        const ccDebt = debts
+            .filter(d => d.accountId === account.id && d.type === 'credit_card' && d.status === 'active')
+            .reduce((sum, d) => sum + d.currentBalance, 0);
+        return limit - ccDebt;
+    }
+    return account.balance;
+};
+
 const AccountSelector = ({
-    label, accounts, selectedId, onSelect, activeColor,
+    label, accounts, debts, selectedId, onSelect, activeColor,
 }: {
     label: string;
     accounts: Account[];
+    debts: Debt[];
     selectedId: string;
     onSelect: (id: string) => void;
     activeColor: string;
@@ -87,6 +99,8 @@ const AccountSelector = ({
             {accounts.map(account => {
                 const { emoji, bg } = getAccountVisual(account.type);
                 const isSelected = selectedId === account.id;
+                const displayBalance = getAccountDisplayBalance(account, debts);
+                const isCC = account.type === 'credit_card';
                 return (
                     <button
                         key={account.id}
@@ -104,7 +118,9 @@ const AccountSelector = ({
                             </div>
                             <div className="text-left">
                                 <p className="font-semibold text-sm text-foreground">{account.name}</p>
-                                <p className="text-xs text-muted-foreground">S/{account.balance.toFixed(2)}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    {isCC ? 'Disponible: ' : ''}S/{displayBalance.toFixed(2)}
+                                </p>
                             </div>
                         </div>
                         <RadioDot isSelected={isSelected} color={activeColor} />
@@ -185,10 +201,7 @@ export const TransactionForm = ({ onSuccess, onCancel: _onCancel, initialValues,
             const account = accounts.find(a => a.id === fromAccountId);
             if (account) {
                 if (account.type === 'credit_card') {
-                    const limit = account.creditLimit || 0;
-                    const accountDebts = data.debts.filter(d => d.accountId === account.id && d.status === 'active');
-                    const currentDebt = accountDebts.reduce((sum, d) => sum + d.currentBalance, 0);
-                    const available = limit - currentDebt;
+                    const available = getAccountDisplayBalance(account, data.debts);
                     if (Number(amount) > available) {
                         alert(`Fondos insuficientes. Tu tarjeta ${account.name} solo tiene ${available.toFixed(2)} disponible.`);
                         return;
@@ -393,6 +406,7 @@ export const TransactionForm = ({ onSuccess, onCancel: _onCancel, initialValues,
                             <AccountSelector
                                 label={type === 'transfer' ? 'Cuenta Origen (Paga)' : type === 'debt_payment' ? 'Cuenta de Pago' : 'Cuenta Origen (Paga)'}
                                 accounts={accounts}
+                                debts={data.debts}
                                 selectedId={fromAccountId}
                                 onSelect={setFromAccountId}
                                 activeColor={config.color}
@@ -405,6 +419,7 @@ export const TransactionForm = ({ onSuccess, onCancel: _onCancel, initialValues,
                                 <AccountSelector
                                     label="Cuenta Destino (Recibe)"
                                     accounts={accounts}
+                                    debts={data.debts}
                                     selectedId={toAccountId}
                                     onSelect={setToAccountId}
                                     activeColor={config.color}
